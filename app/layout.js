@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
       <body className="bg-black text-white">
 
         {/* NAVBAR */}
-        <nav className="flex gap-6 p-4 border-b border-gray-800 bg-black text-white">
+        <nav className="flex gap-6 p-4 border-b border-gray-800 bg-black text-white text-lg font-semibold">
 
           <Link href="/" className="hover:text-green-400">
             Home
@@ -24,6 +24,10 @@ export default function RootLayout({ children }) {
 
           <Link href="/finished" className="hover:text-green-400">
             Finished
+          </Link>
+
+          <Link href="/fixtures" className="hover:text-green-400">
+            Fixtures
           </Link>
 
           <Link href="/news" className="hover:text-green-400">
