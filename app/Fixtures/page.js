@@ -34,7 +34,6 @@ export default async function FixturesPage() {
             <p className="text-gray-400 mt-2">
               {new Date(match.utcDate).toLocaleString()}
             </p>
-
             <p className="text-blue-400 mt-2">
               {match.competition.name}
             </p>
