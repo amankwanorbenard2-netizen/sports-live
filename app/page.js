@@ -1,9 +1,9 @@
-export default function HomePage() {
+export default function Home() {
   return (
     <div
       style={{
-        backgroundColor: "#000",
-        color: "#fff",
+        backgroundColor: "black",
+        color: "white",
         minHeight: "100vh",
         padding: "20px",
       }}
@@ -11,20 +11,15 @@ export default function HomePage() {
       <h1
         style={{
           color: "#39ff14",
-          fontSize: "48px",
+          fontSize: "50px",
           fontWeight: "bold",
-          marginBottom: "30px",
         }}
       >
         Sports Live
       </h1>
 
-      <h2 style={{ marginBottom: "20px" }}>
-        Welcome to Sports Live
-      </h2>
-
-      <p>
-        Live matches, finished matches, fixtures and football news.
+      <p style={{ fontSize: "20px", marginTop: "20px" }}>
+        Live matches, fixtures and football news.
       </p>
     </div>
   );
