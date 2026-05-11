@@ -1,10 +1,13 @@
 async function getNews() {
   const res = await fetch(
-    "https://newsapi.org/v2/everything?q=football&language=en&sortBy=publishedAt&pageSize=10&apiKey=8f3cf00e60fc4b80a12f18e26b85b3c2",
-    { cache: "no-store" }
+    "https://gnews.io/api/v4/search?q=football&lang=en&max=10&apikey=679c08a9e0790162951d756ad3fd2693",
+    {
+      cache: "no-store"
+    }
   );
 
   const data = await res.json();
+
   return data.articles || [];
 }
 
@@ -12,45 +15,67 @@ export default async function NewsPage() {
   const news = await getNews();
 
   return (
-    <div className="p-6">
-      <h1 className="text-5xl font-bold mb-4 text-white">
-        Football News
-      </h1>
+    <main className="min-h-screen bg-black text-white p-6">
 
-      <p className="text-gray-400 mb-8">
-        Latest football headlines from around the world.
-      </p>
+      <div className="mb-10">
 
-      <div className="grid gap-6">
+        <h1 className="text-5xl font-black mb-4">
+          Football News
+        </h1>
+
+        <p className="text-gray-400 text-xl">
+          Latest football headlines from around the world.
+        </p>
+
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
         {news.map((article, index) => (
+
           <a
             key={index}
             href={article.url}
             target="_blank"
-            className="bg-gray-900 p-6 rounded-xl border border-gray-800 block"
+            className="bg-gray-900 rounded-3xl overflow-hidden border border-gray-800 hover:border-green-500 transition"
           >
-            {article.urlToImage && (
+
+            {article.image && (
+
               <img
-                src={article.urlToImage}
-                alt=""
-                className="w-full h-64 object-cover rounded-lg mb-4"
+                src={article.image}
+                alt={article.title}
+                className="w-full h-64 object-cover"
               />
+
             )}
 
-            <h2 className="text-2xl font-bold mb-3 text-white">
-              {article.title}
-            </h2>
+            <div className="p-6">
 
-            <p className="text-gray-400">
-              {article.description}
-            </p>
+              <p className="text-green-400 text-sm font-bold mb-3">
+                {article.source.name}
+              </p>
 
-            <p className="text-gray-500 mt-4 text-sm">
-              {new Date(article.publishedAt).toLocaleString()}
-            </p>
+              <h2 className="text-2xl font-black mb-4">
+                {article.title}
+              </h2>
+
+              <p className="text-gray-400 leading-7">
+                {article.description}
+              </p>
+
+              <p className="text-gray-500 mt-6 text-sm">
+                {new Date(article.publishedAt).toLocaleString()}
+              </p>
+
+            </div>
+
           </a>
+
         ))}
+
       </div>
-    </div>
+
+    </main>
   );
 }
