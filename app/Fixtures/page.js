@@ -1,73 +1,88 @@
 async function getFixtures() {
+  try {
+    const today = new Date();
 
-  const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
 
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
+    const currentDate = `${year}-${month}-${day}`;
 
-  const nextWeek = new Date();
-  nextWeek.setDate(today.getDate() + 7);
+    const res = await fetch(
+      `https://v3.football.api-sports.io/fixtures?date=${currentDate}`,
+      {
+        headers: {
+          "x-apisports-key":
+            "76a878aeb39d96d56d9fbf38ba573654",
+        },
+        cache: "no-store",
+      }
+    );
 
-  const fromDate = tomorrow.toISOString().split("T")[0];
-  const toDate = nextWeek.toISOString().split("T")[0];
+    const data = await res.json();
 
-  const res = await fetch(
-    `https://api.football-data.org/v4/matches?dateFrom=${fromDate}&dateTo=${toDate}`,
-    {
-      headers: {
-        "X-Auth-Token": "8f3cf00e60fc4b80a12f18e26b85b3c2",
-      },
-      cache: "no-store",
-    }
-  );
-
-  const data = await res.json();
-
-  return data.matches || [];
+    return data.response || [];
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 }
 
 export default async function FixturesPage() {
-
   const matches = await getFixtures();
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
-
-      <h1 className="text-5xl font-bold text-green-400 mb-8">
-        Upcoming Fixtures
+    <div
+      style={{
+        backgroundColor: "black",
+        minHeight: "100vh",
+        color: "white",
+        padding: "20px",
+      }}
+    >
+      <h1
+        style={{
+          color: "#39ff14",
+          fontSize: "40px",
+          marginBottom: "30px",
+        }}
+      >
+        Fixtures
       </h1>
 
-      <div className="space-y-4">
+      {matches.length === 0 ? (
+        <p>No fixtures found.</p>
+      ) : (
+        matches.map((match) => (
+          <div
+            key={match.fixture.id}
+            style={{
+              backgroundColor: "#111",
+              padding: "20px",
+              marginBottom: "20px",
+              borderRadius: "15px",
+              border: "1px solid #333",
+            }}
+          >
+            <h2>
+              {match.teams.home.name} vs{" "}
+              {match.teams.away.name}
+            </h2>
 
-        {matches.length === 0 ? (
-          <p>No upcoming fixtures found.</p>
-        ) : (
-          matches.map((match) => (
+            <p style={{ color: "#39ff14" }}>
+              {match.league.name}
+            </p>
 
-            <div
-              key={match.id}
-              className="bg-gray-900 p-5 rounded-2xl border border-gray-800"
-            >
+            <p style={{ color: "gray" }}>
+              {new Date(match.fixture.date).toLocaleString()}
+            </p>
 
-              <p className="text-2xl font-bold">
-                {match.homeTeam?.name} vs {match.awayTeam?.name}
-              </p>
-
-              <p className="text-green-400 mt-3">
-                {match.competition?.name}
-              </p>
-
-              <p className="text-gray-400 mt-2">
-                {new Date(match.utcDate).toLocaleString()}
-              </p>
-
-            </div>
-
-          ))
-        )}
-
-      </div>
-
+            <p style={{ color: "orange" }}>
+              {match.fixture.status.long}
+            </p>
+          </div>
+        ))
+      )}
     </div>
   );
 }
