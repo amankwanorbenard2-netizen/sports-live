@@ -40,9 +40,30 @@ async function getFixtures() {
   }
 }
 
+function groupByLeague(matches) {
+
+  const grouped = {};
+
+  matches.forEach((match) => {
+
+    const league = match.league.name;
+
+    if (!grouped[league]) {
+      grouped[league] = [];
+    }
+
+    grouped[league].push(match);
+
+  });
+
+  return grouped;
+}
+
 export default async function FixturesPage() {
 
   const matches = await getFixtures();
+
+  const groupedMatches = groupByLeague(matches);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -51,41 +72,39 @@ export default async function FixturesPage() {
         Tomorrow Fixtures
       </h1>
 
-      {matches.length === 0 ? (
+      {Object.keys(groupedMatches).map((league) => (
 
-        <p className="text-gray-400">
-          No upcoming fixtures found.
-        </p>
+        <div key={league} className="mb-10">
 
-      ) : (
+          <h2 className="text-3xl font-bold text-yellow-400 mb-4">
+            {league}
+          </h2>
 
-        matches.map((match) => (
+          {groupedMatches[league].map((match) => (
 
-          <div
-            key={match.fixture.id}
-            className="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-4"
-          >
+            <div
+              key={match.fixture.id}
+              className="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-4"
+            >
 
-            <h2 className="text-2xl font-bold">
-              {match.teams.home.name} vs{" "}
-              {match.teams.away.name}
-            </h2>
+              <h3 className="text-2xl font-bold">
+                {match.teams.home.name} vs{" "}
+                {match.teams.away.name}
+              </h3>
 
-            <p className="text-green-400 mt-2">
-              {match.league.name}
-            </p>
+              <p className="text-gray-400 mt-2">
+                {new Date(match.fixture.date).toLocaleString("en-GB", {
+                  timeZone: "Africa/Accra",
+                })}
+              </p>
 
-            <p className="text-gray-400 mt-2">
-              {new Date(match.fixture.date).toLocaleString("en-GB", {
-                timeZone: "Africa/Accra",
-              })}
-            </p>
+            </div>
 
-          </div>
+          ))}
 
-        ))
+        </div>
 
-      )}
+      ))}
 
     </div>
   );
