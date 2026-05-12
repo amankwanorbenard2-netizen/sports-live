@@ -1,78 +1,141 @@
-async function getFixtures() {
-  try {
+"use client";
 
-    const now = new Date();
+import { useEffect, useState } from "react";
 
-    const ghanaDate = new Date(
-      now.toLocaleString("en-US", {
-        timeZone: "Africa/Accra",
-      })
-    );
+export default function FixturesPage() {
 
-    ghanaDate.setDate(ghanaDate.getDate() + 1);
+  const [matches, setMatches] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
 
-    const year = ghanaDate.getFullYear();
-    const month = String(ghanaDate.getMonth() + 1).padStart(2, "0");
-    const day = String(ghanaDate.getDate()).padStart(2, "0");
+  const dates = [];
 
-    const nextDate = `${year}-${month}-${day}`;
+  const now = new Date();
 
-    const res = await fetch(
-      `https://v3.football.api-sports.io/fixtures?date=${nextDate}`,
-      {
-        headers: {
-          "x-apisports-key":
-            "76a878aeb39d96d56d9fbf38ba573654",
-        },
-        cache: "no-store",
-      }
-    );
+  for (let i = -2; i < 5; i++) {
 
-    const data = await res.json();
+    const future = new Date(now);
 
-    return (data.response || []).filter(
-      (match) => match.fixture.status.short === "NS"
-    );
+    future.setDate(now.getDate() + i);
 
-  } catch (error) {
-    console.log(error);
-    return [];
+    const year = future.getFullYear();
+
+    const month = String(
+      future.getMonth() + 1
+    ).padStart(2, "0");
+
+    const day = String(
+      future.getDate()
+    ).padStart(2, "0");
+
+    dates.push(`${year}-${month}-${day}`);
   }
-}
 
-function groupByLeague(matches) {
+  useEffect(() => {
 
-  const grouped = {};
+    const fetchFixtures = async () => {
+
+      const dateToLoad = selectedDate || dates[2];
+
+      setSelectedDate(dateToLoad);
+
+      try {
+
+        const res = await fetch(
+          `https://v3.football.api-sports.io/fixtures?date=${dateToLoad}`,
+          {
+            headers: {
+              "x-apisports-key":
+                "76a878aeb39d96d56d9fbf38ba573654",
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        setMatches(data.response || []);
+
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchFixtures();
+
+  }, [selectedDate]);
+
+  const groupedMatches = {};
 
   matches.forEach((match) => {
 
     const league = match.league.name;
 
-    if (!grouped[league]) {
-      grouped[league] = [];
+    if (!groupedMatches[league]) {
+      groupedMatches[league] = [];
     }
 
-    grouped[league].push(match);
+    groupedMatches[league].push(match);
 
   });
 
-  return grouped;
-}
+  const priorityLeagues = [
+    "Premier League",
+    "UEFA Champions League",
+    "La Liga",
+    "Serie A",
+    "Bundesliga",
+    "Ligue 1",
+    "UEFA Europa League",
+  ];
 
-export default async function FixturesPage() {
+  const sortedLeagues = Object.keys(groupedMatches).sort((a, b) => {
 
-  const matches = await getFixtures();
+    const aIndex = priorityLeagues.indexOf(a);
+    const bIndex = priorityLeagues.indexOf(b);
 
-  const groupedMatches = groupByLeague(matches);
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+
+    if (aIndex !== -1) {
+      return -1;
+    }
+
+    if (bIndex !== -1) {
+      return 1;
+    }
+
+    return a.localeCompare(b);
+
+  });
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
 
       <h1 className="text-5xl font-bold text-green-400 mb-8">
-        Tomorrow Fixtures
+        Fixtures Calendar
       </h1>
 
-      {Object.keys(groupedMatches).map((league) => (
+      <div className="flex gap-4 overflow-x-auto mb-10">
+
+        {dates.map((date) => (
+
+          <button
+            key={date}
+            onClick={() => setSelectedDate(date)}
+            className={`px-5 py-3 rounded-xl border transition ${
+              date === selectedDate
+                ? "bg-green-500 text-black"
+                : "bg-gray-900 border-gray-700"
+            }`}
+          >
+            {date}
+          </button>
+
+        ))}
+
+      </div>
+
+      {sortedLeagues.map((league) => (
 
         <div key={league} className="mb-10">
 
@@ -87,12 +150,45 @@ export default async function FixturesPage() {
               className="bg-gray-900 p-5 rounded-2xl border border-gray-800 mb-4"
             >
 
-              <h3 className="text-2xl font-bold">
-                {match.teams.home.name} vs{" "}
-                {match.teams.away.name}
-              </h3>
+              <div className="flex justify-between items-center">
 
-              <p className="text-gray-400 mt-2">
+                <div>
+
+                  <h3 className="text-2xl font-bold">
+                    {match.teams.home.name}
+                  </h3>
+
+                  <h3 className="text-2xl font-bold mt-2">
+                    {match.teams.away.name}
+                  </h3>
+
+                </div>
+
+                <div className="text-right">
+
+                  <p className="text-3xl font-bold text-green-400">
+
+                    {match.goals.home !== null
+                      ? match.goals.home
+                      : "-"}
+
+                    {" : "}
+
+                    {match.goals.away !== null
+                      ? match.goals.away
+                      : "-"}
+
+                  </p>
+
+                  <p className="text-orange-400 mt-2">
+                    {match.fixture.status.long}
+                  </p>
+
+                </div>
+
+              </div>
+
+              <p className="text-gray-400 mt-4">
                 {new Date(match.fixture.date).toLocaleString("en-GB", {
                   timeZone: "Africa/Accra",
                 })}
