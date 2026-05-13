@@ -1,108 +1,251 @@
-import Link from "next/link";
+"use client";
 
-async function getFinishedMatches() {
-  const res = await fetch(
-    "https://api.football-data.org/v4/matches?status=FINISHED",
-    {
-      headers: {
-        "X-Auth-Token": "8f3cf00e60fc4b80a12f18e26b85b3c2"
-      },
-      cache: "no-store"
+import { useEffect, useState } from "react";
+
+export default function FinishedPage() {
+
+  const [todayMatches, setTodayMatches] = useState([]);
+  const [yesterdayMatches, setYesterdayMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    async function fetchFinishedMatches() {
+
+      try {
+
+        const today = new Date();
+
+        const yesterday = new Date();
+
+        yesterday.setDate(today.getDate() - 1);
+
+        const todayDate =
+          today.toISOString().split("T")[0];
+
+        const yesterdayDate =
+          yesterday.toISOString().split("T")[0];
+
+        // TODAY
+
+        const todayResponse = await fetch(
+          `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${todayDate}&s=Soccer`
+        );
+
+        const todayData = await todayResponse.json();
+
+        // YESTERDAY
+
+        const yesterdayResponse = await fetch(
+          `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${yesterdayDate}&s=Soccer`
+        );
+
+        const yesterdayData = await yesterdayResponse.json();
+
+        // FILTER FINISHED MATCHES
+
+        const filterFinished = (matches) => {
+
+          return matches.filter((match) => {
+
+            return (
+
+              match.strStatus === "Match Finished" ||
+
+              (
+                match.intHomeScore !== null &&
+                match.intAwayScore !== null
+              )
+
+            );
+
+          });
+
+        };
+
+        setTodayMatches(
+          filterFinished(todayData.events || [])
+        );
+
+        setYesterdayMatches(
+          filterFinished(yesterdayData.events || [])
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
     }
-  );
 
-  const data = await res.json();
+    fetchFinishedMatches();
 
-  return data.matches.slice(0, 20);
-}
+  }, []);
 
-export default async function FinishedPage() {
-  const matches = await getFinishedMatches();
+  // GROUP BY LEAGUE
+
+  const groupByLeague = (matches) => {
+
+    return matches.reduce((groups, match) => {
+
+      const league =
+        match.strLeague || "Other League";
+
+      if (!groups[league]) {
+
+        groups[league] = [];
+
+      }
+
+      groups[league].push(match);
+
+      return groups;
+
+    }, {});
+
+  };
+
+  const todayGrouped =
+    groupByLeague(todayMatches);
+
+  const yesterdayGrouped =
+    groupByLeague(yesterdayMatches);
+
+  if (loading) {
+
+    return (
+
+      <div
+        style={{
+          background: "#0f172a",
+          color: "white",
+          minHeight: "100vh",
+          padding: "20px",
+        }}
+      >
+
+        <h1>Loading Finished Matches...</h1>
+
+      </div>
+
+    );
+
+  }
+
+  const renderLeagueSection = (groupedMatches) => {
+
+    return Object.keys(groupedMatches).map((league) => (
+
+      <div key={league}>
+
+        <h2
+          style={{
+            color: "#22c55e",
+            marginTop: "30px",
+            marginBottom: "20px",
+          }}
+        >
+          {league}
+        </h2>
+
+        {groupedMatches[league].map((match) => (
+
+          <div
+            key={match.idEvent}
+            style={{
+              background: "#1e293b",
+              padding: "20px",
+              borderRadius: "15px",
+              marginBottom: "15px",
+              border: "1px solid #334155",
+            }}
+          >
+
+            <p
+              style={{
+                color: "#ef4444",
+                fontWeight: "bold",
+              }}
+            >
+              FULL TIME
+            </p>
+
+            <h2>
+              {match.strHomeTeam}
+              {" vs "}
+              {match.strAwayTeam}
+            </h2>
+
+            <h1
+              style={{
+                color: "#22c55e",
+              }}
+            >
+              {match.intHomeScore || 0}
+              {" - "}
+              {match.intAwayScore || 0}
+            </h1>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    ));
+
+  };
 
   return (
-    <main className="min-h-screen bg-[#0b0e11] text-white">
 
-      {/* NAVBAR */}
-      <nav className="flex justify-between items-center px-8 py-5 border-b border-gray-800 bg-black">
+    <div
+      style={{
+        background: "#0f172a",
+        color: "white",
+        minHeight: "100vh",
+        padding: "20px",
+      }}
+    >
 
-        <h1 className="text-3xl font-black text-green-400">
-          Sports Live
-        </h1>
+      <h1
+        style={{
+          fontSize: "40px",
+          marginBottom: "30px",
+          color: "#22c55e",
+        }}
+      >
+        Finished Matches
+      </h1>
 
-        <div className="flex gap-8 text-gray-300 font-semibold">
+      <h1
+        style={{
+          marginTop: "20px",
+          marginBottom: "20px",
+        }}
+      >
+        Today
+      </h1>
 
-          <Link href="/">Home</Link>
-          <Link href="/live">Live</Link>
-          <Link href="/finished">Finished</Link>
-          <Link href="/news">News</Link>
+      {renderLeagueSection(todayGrouped)}
 
-        </div>
+      <h1
+        style={{
+          marginTop: "50px",
+          marginBottom: "20px",
+        }}
+      >
+        Yesterday
+      </h1>
 
-      </nav>
+      {renderLeagueSection(yesterdayGrouped)}
 
-      {/* HEADER */}
-      <section className="px-8 py-12 border-b border-gray-800">
+    </div>
 
-        <h1 className="text-6xl font-black">
-          Finished Matches
-        </h1>
-
-      </section>
-
-      {/* MATCHES */}
-      <section className="px-8 py-10">
-
-        <div className="space-y-6">
-
-          {matches.map((match) => (
-
-            <div
-              key={match.id}
-              className="bg-[#161b22] border border-gray-800 rounded-3xl p-8 hover:border-green-500 transition"
-            >
-
-              <div className="flex justify-between items-center">
-
-                <div>
-
-                  <p className="text-green-400 font-bold text-sm mb-2">
-                    {match.competition.name}
-                  </p>
-
-                  <h2 className="text-3xl font-black">
-                    {match.homeTeam.name}
-                  </h2>
-
-                  <p className="text-gray-400 mt-2">
-                    vs {match.awayTeam.name}
-                  </p>
-
-                </div>
-
-                <div className="text-right">
-
-                  <p className="text-5xl font-black text-white">
-                    {match.score.fullTime.home ?? 0}
-                    {" - "}
-                    {match.score.fullTime.away ?? 0}
-                  </p>
-
-                  <p className="text-gray-500 font-bold mt-3">
-                    FULL TIME
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </section>
-
-    </main>
   );
+
 }
