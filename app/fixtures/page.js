@@ -1,105 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function FixturesPage() {
 
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  async function fetchFixtures() {
 
-    async function fetchFixtures() {
+    try {
 
-      try {
+      const response = await fetch("/api/fixtures");
 
-        const leagueIds = [
+      const data = await response.json();
 
-          4328, // Premier League
-          4335, // La Liga
-          4332, // Serie A
-          4331, // Bundesliga
-          4334, // Ligue 1
-          4337, // Eredivisie
-          4339, // Turkish Super Lig
-          4396, // Saudi Pro League
-          4338, // Portugal Liga
-          4336, // Belgian Pro League
-          4374, // MLS
-          4376  // Brazil Serie A
+      setMatches(data.matches || []);
 
-        ];
+    } catch (error) {
 
-        let allMatches = [];
+      console.log(error);
 
-        for (const leagueId of leagueIds) {
+    } finally {
 
-          try {
-
-            const response = await fetch(
-              `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`
-            );
-
-            const data = await response.json();
-
-            if (data.events) {
-
-              allMatches.push(...data.events);
-
-            }
-
-          } catch (error) {
-
-            console.log(error);
-
-          }
-
-        }
-
-        // SORT BY DATE
-
-        allMatches.sort((a, b) => {
-
-          return new Date(a.dateEvent) -
-                 new Date(b.dateEvent);
-
-        });
-
-        setMatches(allMatches);
-
-      } catch (error) {
-
-        console.log(error);
-
-      } finally {
-
-        setLoading(false);
-
-      }
+      setLoading(false);
 
     }
+
+  }
+
+  useEffect(() => {
 
     fetchFixtures();
 
   }, []);
-
-  // GROUP BY LEAGUE
-
-  const groupedMatches = matches.reduce((groups, match) => {
-
-    const league = match.strLeague || "Other League";
-
-    if (!groups[league]) {
-
-      groups[league] = [];
-
-    }
-
-    groups[league].push(match);
-
-    return groups;
-
-  }, {});
 
   if (loading) {
 
@@ -121,7 +56,7 @@ export default function FixturesPage() {
 
       <h1
         style={{
-          color: "#22c55e",
+          color: "#39ff14",
           fontSize: "40px",
           marginBottom: "30px",
         }}
@@ -129,65 +64,135 @@ export default function FixturesPage() {
         Upcoming Fixtures
       </h1>
 
-      {Object.keys(groupedMatches).length === 0 && (
+      {matches.length === 0 && (
 
         <h2>No Upcoming Fixtures</h2>
 
       )}
 
-      {Object.keys(groupedMatches).map((league) => (
+      {matches.map((match) => (
 
-        <div key={league}>
+        <Link
+          key={match.idEvent}
+          href={`/match/${match.idEvent}`}
+          style={{
+            textDecoration: "none",
+            color: "white",
+          }}
+        >
 
-          <h2
+          <div
             style={{
-              color: "#22c55e",
-              marginTop: "35px",
+              background: "#1e293b",
+              borderRadius: "15px",
+              padding: "20px",
               marginBottom: "20px",
+              border: "1px solid #334155",
+              cursor: "pointer",
             }}
           >
-            {league}
-          </h2>
 
-          {groupedMatches[league].map((match) => (
+            {/* LEAGUE */}
+
+            <p
+              style={{
+                color: "#94a3b8",
+                marginBottom: "20px",
+              }}
+            >
+              {match.strLeague}
+            </p>
+
+            {/* MATCH */}
 
             <div
-              key={match.idEvent}
               style={{
-                background: "#1e293b",
-                borderRadius: "15px",
-                padding: "20px",
-                marginBottom: "15px",
-                border: "1px solid #334155",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "10px",
               }}
             >
 
-              <p
+              {/* HOME */}
+
+              <div
                 style={{
-                  color: "#22c55e",
-                  fontWeight: "bold",
+                  textAlign: "center",
+                  width: "35%",
                 }}
               >
-                UPCOMING
-              </p>
 
-              <h2>
-                {match.strHomeTeam}
-                {" vs "}
-                {match.strAwayTeam}
-              </h2>
+                <img
+                  src={
+                    match.strHomeTeamBadge ||
+                    "https://placehold.co/70"
+                  }
+                  alt=""
+                  width="70"
+                  height="70"
+                />
 
-              <p>
-                {match.dateEvent}
-                {" "}
-                {match.strTime || ""}
-              </p>
+                <h3>{match.strHomeTeam}</h3>
+
+              </div>
+
+              {/* TIME */}
+
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
+
+                <h1
+                  style={{
+                    color: "#39ff14",
+                    margin: 0,
+                    fontSize: "28px",
+                  }}
+                >
+                  VS
+                </h1>
+
+                <p
+                  style={{
+                    color: "#facc15",
+                  }}
+                >
+                  {match.strTime || "TBD"}
+                </p>
+
+              </div>
+
+              {/* AWAY */}
+
+              <div
+                style={{
+                  textAlign: "center",
+                  width: "35%",
+                }}
+              >
+
+                <img
+                  src={
+                    match.strAwayTeamBadge ||
+                    "https://placehold.co/70"
+                  }
+                  alt=""
+                  width="70"
+                  height="70"
+                />
+
+                <h3>{match.strAwayTeam}</h3>
+
+              </div>
 
             </div>
 
-          ))}
+          </div>
 
-        </div>
+        </Link>
 
       ))}
 

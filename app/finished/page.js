@@ -1,35 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function FinishedPage() {
 
-  const [matches, setMatches] = useState([]);
+  const [todayMatches, setTodayMatches] = useState([]);
+  const [yesterdayMatches, setYesterdayMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  async function fetchFinishedMatches() {
 
-    async function fetchFinishedMatches() {
+    try {
 
-      try {
+      const response = await fetch("/api/finished");
 
-        const response = await fetch("/api/finished");
+      const data = await response.json();
 
-        const data = await response.json();
+      setTodayMatches(data.today || []);
+      setYesterdayMatches(data.yesterday || []);
 
-        setMatches(data.matches || []);
+    } catch (error) {
 
-      } catch (error) {
+      console.log(error);
 
-        console.log(error);
+    } finally {
 
-      } finally {
-
-        setLoading(false);
-
-      }
+      setLoading(false);
 
     }
+
+  }
+
+  useEffect(() => {
 
     fetchFinishedMatches();
 
@@ -49,13 +52,145 @@ export default function FinishedPage() {
 
   }
 
+  function renderMatches(matches) {
+
+    return matches.map((match) => (
+
+      <Link
+        key={match.idEvent}
+        href={`/match/${match.idEvent}`}
+        style={{
+          textDecoration: "none",
+          color: "white",
+        }}
+      >
+
+        <div
+          style={{
+            background: "#1e293b",
+            borderRadius: "15px",
+            padding: "20px",
+            marginBottom: "20px",
+            border: "1px solid #334155",
+            cursor: "pointer",
+          }}
+        >
+
+          {/* LEAGUE */}
+
+          <p
+            style={{
+              color: "#94a3b8",
+              marginBottom: "20px",
+            }}
+          >
+            {match.strLeague}
+          </p>
+
+          {/* MATCH */}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "10px",
+            }}
+          >
+
+            {/* HOME */}
+
+            <div
+              style={{
+                textAlign: "center",
+                width: "35%",
+              }}
+            >
+
+              <img
+                src={
+                  match.strHomeTeamBadge ||
+                  "https://placehold.co/70"
+                }
+                alt=""
+                width="70"
+                height="70"
+              />
+
+              <h3>{match.strHomeTeam}</h3>
+
+            </div>
+
+            {/* SCORE */}
+
+            <div
+              style={{
+                textAlign: "center",
+              }}
+            >
+
+              <h1
+                style={{
+                  color: "#39ff14",
+                  margin: 0,
+                  fontSize: "32px",
+                }}
+              >
+                {match.intHomeScore ?? 0}
+                {" - "}
+                {match.intAwayScore ?? 0}
+              </h1>
+
+              <p
+                style={{
+                  color: "#facc15",
+                }}
+              >
+                FT
+              </p>
+
+            </div>
+
+            {/* AWAY */}
+
+            <div
+              style={{
+                textAlign: "center",
+                width: "35%",
+              }}
+            >
+
+              <img
+                src={
+                  match.strAwayTeamBadge ||
+                  "https://placehold.co/70"
+                }
+                alt=""
+                width="70"
+                height="70"
+              />
+
+              <h3>{match.strAwayTeam}</h3>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </Link>
+
+    ));
+
+  }
+
   return (
 
     <div style={{ padding: "20px" }}>
 
       <h1
         style={{
-          color: "#22c55e",
+          color: "#39ff14",
           fontSize: "40px",
           marginBottom: "30px",
         }}
@@ -63,51 +198,30 @@ export default function FinishedPage() {
         Finished Matches
       </h1>
 
-      {matches.length === 0 && (
+      {/* TODAY */}
 
-        <h2>No Finished Matches</h2>
+      <h2
+        style={{
+          marginBottom: "20px",
+        }}
+      >
+        Today
+      </h2>
 
-      )}
+      {renderMatches(todayMatches)}
 
-      {matches.map((match) => (
+      {/* YESTERDAY */}
 
-        <div
-          key={match.idEvent}
-          style={{
-            background: "#1e293b",
-            borderRadius: "15px",
-            padding: "20px",
-            marginBottom: "15px",
-            border: "1px solid #334155",
-          }}
-        >
+      <h2
+        style={{
+          marginTop: "40px",
+          marginBottom: "20px",
+        }}
+      >
+        Yesterday
+      </h2>
 
-          <p
-            style={{
-              color: "#22c55e",
-              fontWeight: "bold",
-            }}
-          >
-            FINISHED
-          </p>
-
-          <h2>
-            {match.strHomeTeam}
-            {" "}
-            {match.intHomeScore}
-            {" - "}
-            {match.intAwayScore}
-            {" "}
-            {match.strAwayTeam}
-          </h2>
-
-          <p>{match.strLeague}</p>
-
-          <p>{match.dateEvent}</p>
-
-        </div>
-
-      ))}
+      {renderMatches(yesterdayMatches)}
 
     </div>
 

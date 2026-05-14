@@ -2,12 +2,23 @@ import "./globals.css";
 
 import Link from "next/link";
 
+import {
+  FaHome,
+  FaFutbol,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaNewspaper,
+  FaTable,
+} from "react-icons/fa";
+
 export const metadata = {
   title: "Sports Live",
   description: "Live football matches",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}) {
 
   return (
 
@@ -22,6 +33,8 @@ export default function RootLayout({ children }) {
           paddingBottom: "80px",
         }}
       >
+
+        {/* HEADER */}
 
         <header
           style={{
@@ -42,11 +55,15 @@ export default function RootLayout({ children }) {
 
         </header>
 
+        {/* MAIN */}
+
         <main>
 
           {children}
 
         </main>
+
+        {/* BOTTOM NAV */}
 
         <nav
           style={{
@@ -58,58 +75,69 @@ export default function RootLayout({ children }) {
             borderTop: "1px solid #334155",
             display: "flex",
             justifyContent: "space-around",
-            padding: "15px 0",
+            padding: "12px 0",
+            zIndex: 1000,
           }}
         >
 
+          {/* HOME */}
+
           <Link
             href="/"
-            style={{
-              color: "white",
-              textDecoration: "none",
-            }}
+            style={navStyle}
           >
-            Home
+            <FaHome />
+            <span>Home</span>
           </Link>
+
+          {/* LIVE */}
 
           <Link
             href="/live"
-            style={{
-              color: "#39ff14",
-              textDecoration: "none",
-            }}
+            style={navStyle}
           >
-            Live
+            <FaFutbol />
+            <span>Live</span>
           </Link>
+
+          {/* FIXTURES */}
 
           <Link
             href="/fixtures"
-            style={{
-              color: "white",
-              textDecoration: "none",
-            }}
+            style={navStyle}
           >
-            Fixtures
+            <FaCalendarAlt />
+            <span>Fixtures</span>
           </Link>
+
+          {/* FINISHED */}
 
           <Link
             href="/finished"
-            style={{
-              color: "white",
-              textDecoration: "none",
-            }}
+            style={navStyle}
           >
-            Finished
+            <FaCheckCircle />
+            <span>Finished</span>
           </Link>
+
+          {/* NEWS */}
 
           <Link
             href="/news"
-            style={{
-              color: "white",
-              textDecoration: "none",
-            }}
+            style={navStyle}
           >
-            News
+            <FaNewspaper />
+            <span>News</span>
+          </Link>
+
+          {/* TABLES */}
+
+          <Link
+            href="/standings"
+            style={navStyle}
+          >
+            <FaTable />
+            <span>Tables</span>
           </Link>
 
         </nav>
@@ -121,3 +149,15 @@ export default function RootLayout({ children }) {
   );
 
 }
+
+const navStyle = {
+
+  color: "white",
+  textDecoration: "none",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "5px",
+  fontSize: "12px",
+
+};

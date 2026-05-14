@@ -1,37 +1,44 @@
+const leagues = [
+
+  4328, // Premier League
+  4335, // La Liga
+  4332, // Serie A
+  4331, // Bundesliga
+  4334, // Ligue 1
+  4337, // Eredivisie
+  4346, // MLS
+  4480, // Champions League
+  4481, // Europa League
+  4391, // Portuguese League
+  4330, // Scottish Premiership
+  4344, // Brazilian Serie A
+
+];
+
 export async function GET() {
 
   try {
 
-    const leagueIds = [
-
-      4328, // Premier League
-      4335, // La Liga
-      4332, // Serie A
-      4331, // Bundesliga
-      4334, // Ligue 1
-      4337, // Eredivisie
-      4339, // Turkish Super Lig
-      4396, // Saudi Pro League
-      4338, // Portugal Liga
-      4336, // Belgian Pro League
-      4374, // MLS
-      4376  // Brazil Serie A
-
-    ];
-
     let allMatches = [];
 
-    for (const leagueId of leagueIds) {
+    for (const leagueId of leagues) {
 
       try {
 
         const response = await fetch(
-          `https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=${leagueId}`
+          `https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=${leagueId}`,
+          {
+            cache: "no-store",
+          }
         );
 
         const data = await response.json();
 
-        if (data.events) {
+        if (
+          data &&
+          data.events &&
+          Array.isArray(data.events)
+        ) {
 
           allMatches.push(...data.events);
 
@@ -39,29 +46,25 @@ export async function GET() {
 
       } catch (error) {
 
-        console.log(error);
+        console.log(
+          "League failed:",
+          leagueId
+        );
 
       }
 
     }
 
-    // SORT BY DATE
-
-    allMatches.sort((a, b) => {
-
-      return new Date(b.dateEvent) -
-             new Date(a.dateEvent);
-
-    });
-
     return Response.json({
-      matches: allMatches,
+      today: allMatches.slice(0, 25),
+      yesterday: allMatches.slice(25, 50),
     });
 
   } catch (error) {
 
     return Response.json({
-      matches: [],
+      today: [],
+      yesterday: [],
     });
 
   }

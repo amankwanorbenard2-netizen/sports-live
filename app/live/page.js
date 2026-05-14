@@ -1,41 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function LivePage() {
 
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  async function fetchLiveMatches() {
 
-    async function fetchMatches() {
+    try {
 
-      try {
+      const response = await fetch("/api/live");
 
-        const response = await fetch("/api/live");
+      const data = await response.json();
 
-        const data = await response.json();
+      setMatches(data.matches || []);
 
-        setMatches(data.matches || []);
+    } catch (error) {
 
-      } catch (error) {
+      console.log(error);
 
-        console.log(error);
+    } finally {
 
-      } finally {
-
-        setLoading(false);
-
-      }
+      setLoading(false);
 
     }
 
-    fetchMatches();
+  }
+
+  useEffect(() => {
+
+    fetchLiveMatches();
 
     const interval = setInterval(() => {
 
-      fetchMatches();
+      fetchLiveMatches();
 
     }, 30000);
 
@@ -43,33 +44,11 @@ export default function LivePage() {
 
   }, []);
 
-  // GROUP BY LEAGUE
-
-  const groupedMatches = matches.reduce((groups, match) => {
-
-    const league = match.strLeague || "Other League";
-
-    if (!groups[league]) {
-
-      groups[league] = [];
-
-    }
-
-    groups[league].push(match);
-
-    return groups;
-
-  }, {});
-
   if (loading) {
 
     return (
 
-      <div
-        style={{
-          padding: "20px",
-        }}
-      >
+      <div style={{ padding: "20px" }}>
 
         <h1>Loading Live Matches...</h1>
 
@@ -81,194 +60,184 @@ export default function LivePage() {
 
   return (
 
-    <div
-      style={{
-        padding: "20px",
-      }}
-    >
+    <div style={{ padding: "20px" }}>
 
       <h1
         style={{
-          color: "#22c55e",
+          color: "#39ff14",
           fontSize: "40px",
           marginBottom: "30px",
         }}
       >
-        Live Football
+        Live Football Matches
       </h1>
 
-      {Object.keys(groupedMatches).length === 0 && (
+      {matches.length === 0 && (
 
         <h2>No Live Matches Available</h2>
 
       )}
 
-      {Object.keys(groupedMatches).map((league) => (
+      {matches.map((match) => (
 
-        <div key={league}>
+        <Link
+          key={match.idEvent}
+          href={`/match/${match.idEvent}`}
+          style={{
+            textDecoration: "none",
+            color: "white",
+          }}
+        >
 
-          <h2
+          <div
             style={{
-              color: "#22c55e",
-              marginTop: "35px",
+              background: "#1e293b",
+              borderRadius: "15px",
+              padding: "20px",
               marginBottom: "20px",
+              border: "1px solid #334155",
+              cursor: "pointer",
             }}
           >
-            {league}
-          </h2>
 
-          {groupedMatches[league].map((match) => (
+            {/* LIVE STATUS */}
 
             <div
-              key={match.idEvent}
               style={{
-                background: "#1e293b",
-                borderRadius: "15px",
-                padding: "20px",
-                marginBottom: "15px",
-                border: "1px solid #334155",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "20px",
               }}
             >
 
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "15px",
-                  flexWrap: "wrap",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "red",
+                }}
+              />
+
+              <span
+                style={{
+                  color: "#39ff14",
+                  fontWeight: "bold",
                 }}
               >
+                LIVE
+              </span>
 
-                <p
-                  style={{
-                    color: "#22c55e",
-                    fontWeight: "bold",
-                    margin: 0,
-                  }}
-                >
-                  {
+              <span
+                style={{
+                  color: "#facc15",
+                  fontWeight: "bold",
+                }}
+              >
+                {match.strStatus || ""}
+              </span>
 
-                    match.strStatus === "Match Finished"
-                      ? "FT"
-                      : match.strStatus || "LIVE"
+            </div>
 
-                  }
-                </p>
+            {/* MATCH ROW */}
 
-                <p
-                  style={{
-                    margin: 0,
-                  }}
-                >
-                  {match.strTime || ""}
-                </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "10px",
+              }}
+            >
 
-              </div>
-
-              {/* MATCH */}
+              {/* HOME */}
 
               <div
                 style={{
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "10px",
-                  flexWrap: "wrap",
+                  width: "35%",
+                  textAlign: "center",
                 }}
               >
 
-                {/* HOME */}
+                <img
+                  src={
+                    match.strHomeTeamBadge ||
+                    "https://placehold.co/70"
+                  }
+                  alt=""
+                  width="70"
+                  height="70"
+                />
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    width: "35%",
-                  }}
-                >
+                <h3>{match.strHomeTeam}</h3>
 
-                  <img
-                    src={
-                      match.strHomeTeamBadge ||
-                      "https://placehold.co/40"
-                    }
-                    alt=""
-                    width="40"
-                    height="40"
-                    style={{
-                      borderRadius: "50%",
-                    }}
-                  />
+              </div>
 
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "16px",
-                    }}
-                  >
-                    {match.strHomeTeam}
-                  </h3>
+              {/* SCORE */}
 
-                </div>
-
-                {/* SCORE */}
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
 
                 <h1
                   style={{
-                    color: "#22c55e",
+                    color: "#39ff14",
+                    fontSize: "40px",
                     margin: 0,
-                    fontSize: "30px",
                   }}
                 >
-                  {match.intHomeScore || 0}
+                  {match.intHomeScore ?? 0}
                   {" - "}
-                  {match.intAwayScore || 0}
+                  {match.intAwayScore ?? 0}
                 </h1>
 
-                {/* AWAY */}
-
-                <div
+                <p
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    justifyContent: "flex-end",
-                    width: "35%",
+                    color: "#94a3b8",
                   }}
                 >
+                  {match.strLeague}
+                </p>
 
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "16px",
-                    }}
-                  >
-                    {match.strAwayTeam}
-                  </h3>
+              </div>
 
-                  <img
-                    src={
-                      match.strAwayTeamBadge ||
-                      "https://placehold.co/40"
-                    }
-                    alt=""
-                    width="40"
-                    height="40"
-                    style={{
-                      borderRadius: "50%",
-                    }}
-                  />
+              {/* AWAY */}
 
-                </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "35%",
+                  textAlign: "center",
+                }}
+              >
+
+                <img
+                  src={
+                    match.strAwayTeamBadge ||
+                    "https://placehold.co/70"
+                  }
+                  alt=""
+                  width="70"
+                  height="70"
+                />
+
+                <h3>{match.strAwayTeam}</h3>
 
               </div>
 
             </div>
 
-          ))}
+          </div>
 
-        </div>
+        </Link>
 
       ))}
 
