@@ -13,55 +13,57 @@ export default function FixturesPage() {
 
       try {
 
-        const today = new Date();
+        const leagueIds = [
 
-        const tomorrow = new Date();
-
-        tomorrow.setDate(today.getDate() + 1);
-
-        const todayDate =
-          today.toISOString().split("T")[0];
-
-        const tomorrowDate =
-          tomorrow.toISOString().split("T")[0];
-
-        // TODAY MATCHES
-
-        const todayResponse = await fetch(
-          `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${todayDate}&s=Soccer`
-        );
-
-        const todayData = await todayResponse.json();
-
-        // TOMORROW MATCHES
-
-        const tomorrowResponse = await fetch(
-          `https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${tomorrowDate}&s=Soccer`
-        );
-
-        const tomorrowData = await tomorrowResponse.json();
-
-        const allMatches = [
-
-          ...(todayData.events || []),
-          ...(tomorrowData.events || []),
+          4328, // Premier League
+          4335, // La Liga
+          4332, // Serie A
+          4331, // Bundesliga
+          4334, // Ligue 1
+          4396, // Saudi Pro League
+          4374, // MLS
+          4376, // Brazil Serie A
+          4338, // Portugal Liga
+          4337, // Netherlands Eredivisie
+          4339, // Turkish Super Lig
+          4336, // Belgian Pro League
 
         ];
 
-        // REMOVE FINISHED MATCHES
+        let allMatches = [];
 
-        const upcomingMatches = allMatches.filter((match) => {
+        const responses = await Promise.all(
 
-          return (
+          leagueIds.map((leagueId) =>
 
-            match.strStatus !== "Match Finished" &&
-            match.strStatus !== "FT"
+            fetch(
+              `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`
+            ).then((res) => res.json())
 
-          );
+          )
+
+        );
+
+        responses.forEach((data) => {
+
+          if (data.events) {
+
+            allMatches.push(...data.events);
+
+          }
 
         });
 
-        setMatches(upcomingMatches);
+        // SORT BY DATE
+
+        allMatches.sort((a, b) => {
+
+          return new Date(a.dateEvent) -
+                 new Date(b.dateEvent);
+
+        });
+
+        setMatches(allMatches);
 
       } catch (error) {
 
@@ -136,12 +138,12 @@ export default function FixturesPage() {
           marginBottom: "30px",
         }}
       >
-        Fixtures
+        Upcoming Fixtures
       </h1>
 
       {Object.keys(groupedMatches).length === 0 && (
 
-        <h2>No Upcoming Matches</h2>
+        <h2>No Upcoming Fixtures</h2>
 
       )}
 
@@ -152,7 +154,7 @@ export default function FixturesPage() {
           <h2
             style={{
               color: "#22c55e",
-              marginTop: "30px",
+              marginTop: "35px",
               marginBottom: "20px",
             }}
           >
@@ -176,6 +178,8 @@ export default function FixturesPage() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "10px",
                   marginBottom: "10px",
                 }}
               >
@@ -190,20 +194,22 @@ export default function FixturesPage() {
                 </p>
 
                 <p>
+                  {match.dateEvent}
+                  {" "}
                   {match.strTime || ""}
                 </p>
 
               </div>
 
-              <h2>
+              <h2
+                style={{
+                  marginBottom: "10px",
+                }}
+              >
                 {match.strHomeTeam}
                 {" vs "}
                 {match.strAwayTeam}
               </h2>
-
-              <p>
-                {match.dateEvent}
-              </p>
 
             </div>
 
