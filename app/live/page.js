@@ -31,11 +31,7 @@ export default function LivePage() {
 
     }
 
-    // FIRST LOAD
-
     fetchMatches();
-
-    // AUTO REFRESH EVERY 30 SECONDS
 
     const interval = setInterval(() => {
 
@@ -47,7 +43,7 @@ export default function LivePage() {
 
   }, []);
 
-  // GROUP MATCHES BY LEAGUE
+  // GROUP BY LEAGUE
 
   const groupedMatches = matches.reduce((groups, match) => {
 
@@ -71,9 +67,6 @@ export default function LivePage() {
 
       <div
         style={{
-          background: "#0f172a",
-          color: "white",
-          minHeight: "100vh",
           padding: "20px",
         }}
       >
@@ -90,9 +83,6 @@ export default function LivePage() {
 
     <div
       style={{
-        background: "#0f172a",
-        color: "white",
-        minHeight: "100vh",
         padding: "20px",
       }}
     >
@@ -104,7 +94,7 @@ export default function LivePage() {
           marginBottom: "30px",
         }}
       >
-        Live Football Matches
+        Live Football
       </h1>
 
       {Object.keys(groupedMatches).length === 0 && (
@@ -120,7 +110,7 @@ export default function LivePage() {
           <h2
             style={{
               color: "#22c55e",
-              marginTop: "30px",
+              marginTop: "35px",
               marginBottom: "20px",
             }}
           >
@@ -144,9 +134,8 @@ export default function LivePage() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginBottom: "10px",
+                  marginBottom: "15px",
                   flexWrap: "wrap",
-                  gap: "10px",
                 }}
               >
 
@@ -154,6 +143,7 @@ export default function LivePage() {
                   style={{
                     color: "#22c55e",
                     fontWeight: "bold",
+                    margin: 0,
                   }}
                 >
                   {
@@ -165,32 +155,114 @@ export default function LivePage() {
                   }
                 </p>
 
-                <p>
+                <p
+                  style={{
+                    margin: 0,
+                  }}
+                >
                   {match.strTime || ""}
                 </p>
 
               </div>
 
-              <h2
-                style={{
-                  marginBottom: "10px",
-                }}
-              >
-                {match.strHomeTeam}
-                {" vs "}
-                {match.strAwayTeam}
-              </h2>
+              {/* MATCH */}
 
-              <h1
+              <div
                 style={{
-                  color: "#22c55e",
-                  fontSize: "35px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  flexWrap: "wrap",
                 }}
               >
-                {match.intHomeScore || 0}
-                {" - "}
-                {match.intAwayScore || 0}
-              </h1>
+
+                {/* HOME */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    width: "35%",
+                  }}
+                >
+
+                  <img
+                    src={
+                      match.strHomeTeamBadge ||
+                      "https://placehold.co/40"
+                    }
+                    alt=""
+                    width="40"
+                    height="40"
+                    style={{
+                      borderRadius: "50%",
+                    }}
+                  />
+
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: "16px",
+                    }}
+                  >
+                    {match.strHomeTeam}
+                  </h3>
+
+                </div>
+
+                {/* SCORE */}
+
+                <h1
+                  style={{
+                    color: "#22c55e",
+                    margin: 0,
+                    fontSize: "30px",
+                  }}
+                >
+                  {match.intHomeScore || 0}
+                  {" - "}
+                  {match.intAwayScore || 0}
+                </h1>
+
+                {/* AWAY */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    justifyContent: "flex-end",
+                    width: "35%",
+                  }}
+                >
+
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: "16px",
+                    }}
+                  >
+                    {match.strAwayTeam}
+                  </h3>
+
+                  <img
+                    src={
+                      match.strAwayTeamBadge ||
+                      "https://placehold.co/40"
+                    }
+                    alt=""
+                    width="40"
+                    height="40"
+                    style={{
+                      borderRadius: "50%",
+                    }}
+                  />
+
+                </div>
+
+              </div>
 
             </div>
 

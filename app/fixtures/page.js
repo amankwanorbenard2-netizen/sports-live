@@ -20,39 +20,41 @@ export default function FixturesPage() {
           4332, // Serie A
           4331, // Bundesliga
           4334, // Ligue 1
-          4396, // Saudi Pro League
-          4374, // MLS
-          4376, // Brazil Serie A
-          4338, // Portugal Liga
-          4337, // Netherlands Eredivisie
+          4337, // Eredivisie
           4339, // Turkish Super Lig
+          4396, // Saudi Pro League
+          4338, // Portugal Liga
           4336, // Belgian Pro League
+          4374, // MLS
+          4376  // Brazil Serie A
 
         ];
 
         let allMatches = [];
 
-        const responses = await Promise.all(
+        for (const leagueId of leagueIds) {
 
-          leagueIds.map((leagueId) =>
+          try {
 
-            fetch(
+            const response = await fetch(
               `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`
-            ).then((res) => res.json())
+            );
 
-          )
+            const data = await response.json();
 
-        );
+            if (data.events) {
 
-        responses.forEach((data) => {
+              allMatches.push(...data.events);
 
-          if (data.events) {
+            }
 
-            allMatches.push(...data.events);
+          } catch (error) {
+
+            console.log(error);
 
           }
 
-        });
+        }
 
         // SORT BY DATE
 
@@ -103,14 +105,7 @@ export default function FixturesPage() {
 
     return (
 
-      <div
-        style={{
-          background: "#0f172a",
-          color: "white",
-          minHeight: "100vh",
-          padding: "20px",
-        }}
-      >
+      <div style={{ padding: "20px" }}>
 
         <h1>Loading Fixtures...</h1>
 
@@ -122,14 +117,7 @@ export default function FixturesPage() {
 
   return (
 
-    <div
-      style={{
-        background: "#0f172a",
-        color: "white",
-        minHeight: "100vh",
-        padding: "20px",
-      }}
-    >
+    <div style={{ padding: "20px" }}>
 
       <h1
         style={{
@@ -174,42 +162,26 @@ export default function FixturesPage() {
               }}
             >
 
-              <div
+              <p
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: "10px",
-                  marginBottom: "10px",
+                  color: "#22c55e",
+                  fontWeight: "bold",
                 }}
               >
+                UPCOMING
+              </p>
 
-                <p
-                  style={{
-                    color: "#22c55e",
-                    fontWeight: "bold",
-                  }}
-                >
-                  UPCOMING
-                </p>
-
-                <p>
-                  {match.dateEvent}
-                  {" "}
-                  {match.strTime || ""}
-                </p>
-
-              </div>
-
-              <h2
-                style={{
-                  marginBottom: "10px",
-                }}
-              >
+              <h2>
                 {match.strHomeTeam}
                 {" vs "}
                 {match.strAwayTeam}
               </h2>
+
+              <p>
+                {match.dateEvent}
+                {" "}
+                {match.strTime || ""}
+              </p>
 
             </div>
 

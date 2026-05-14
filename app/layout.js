@@ -1,9 +1,10 @@
 import "./globals.css";
+
 import Link from "next/link";
 
 export const metadata = {
   title: "Sports Live",
-  description: "Football App",
+  description: "Live football matches",
 };
 
 export default function RootLayout({ children }) {
@@ -12,47 +13,106 @@ export default function RootLayout({ children }) {
 
     <html lang="en">
 
-      <body>
+      <body
+        style={{
+          margin: 0,
+          background: "#0f172a",
+          color: "white",
+          fontFamily: "Arial",
+          paddingBottom: "80px",
+        }}
+      >
 
-        <nav
+        <header
           style={{
             background: "#111827",
-            padding: "15px",
+            padding: "20px",
             borderBottom: "1px solid #334155",
-            position: "sticky",
-            top: 0,
-            zIndex: 1000,
           }}
         >
 
-          <div
+          <h1
             style={{
-              display: "flex",
-              gap: "20px",
-              overflowX: "auto",
-              whiteSpace: "nowrap",
+              color: "#39ff14",
+              margin: 0,
             }}
           >
+            ⚽ Sports Live
+          </h1>
 
-            <Link href="/">Home</Link>
+        </header>
 
-            <Link href="/live">Live</Link>
-
-            <Link href="/finished">Finished</Link>
-
-            <Link href="/fixtures">Fixtures</Link>
-
-            <Link href="/news">News</Link>
-
-          </div>
-
-        </nav>
-
-        <main className="container">
+        <main>
 
           {children}
 
         </main>
+
+        <nav
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: "#1e293b",
+            borderTop: "1px solid #334155",
+            display: "flex",
+            justifyContent: "space-around",
+            padding: "15px 0",
+          }}
+        >
+
+          <Link
+            href="/"
+            style={{
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Home
+          </Link>
+
+          <Link
+            href="/live"
+            style={{
+              color: "#39ff14",
+              textDecoration: "none",
+            }}
+          >
+            Live
+          </Link>
+
+          <Link
+            href="/fixtures"
+            style={{
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Fixtures
+          </Link>
+
+          <Link
+            href="/finished"
+            style={{
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Finished
+          </Link>
+
+          <Link
+            href="/news"
+            style={{
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            News
+          </Link>
+
+        </nav>
 
       </body>
 
