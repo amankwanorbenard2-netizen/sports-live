@@ -1,163 +1,120 @@
 import "./globals.css";
-
 import Link from "next/link";
-
-import {
-  FaHome,
-  FaFutbol,
-  FaCalendarAlt,
-  FaCheckCircle,
-  FaNewspaper,
-  FaTable,
-} from "react-icons/fa";
 
 export const metadata = {
   title: "Sports Live",
-  description: "Live football matches",
+  description: "Football Live Scores App",
 };
 
-export default function RootLayout({
-  children,
-}) {
-
+export default function RootLayout({ children }) {
   return (
-
     <html lang="en">
-
       <body
         style={{
           margin: 0,
-          background: "#0f172a",
-          color: "white",
+          padding: 0,
+          background: "#111827",
           fontFamily: "Arial",
-          paddingBottom: "80px",
         }}
       >
-
-        {/* HEADER */}
-
-        <header
+        {/* TOP NAVBAR */}
+        <div
           style={{
-            background: "#111827",
+            background: "#1f2937",
             padding: "20px",
-            borderBottom: "1px solid #334155",
+            borderBottom: "1px solid #374151",
+            position: "sticky",
+            top: 0,
+            zIndex: 1000,
           }}
         >
-
           <h1
             style={{
-              color: "#39ff14",
+              color: "#84cc16",
               margin: 0,
+              fontSize: "38px",
+              fontWeight: "bold",
             }}
           >
             ⚽ Sports Live
           </h1>
+        </div>
 
-        </header>
+        {/* PAGE CONTENT */}
+        <div>{children}</div>
 
-        {/* MAIN */}
-
-        <main>
-
-          {children}
-
-        </main>
-
-        {/* BOTTOM NAV */}
-
-        <nav
+        {/* BOTTOM NAVIGATION */}
+        <div
           style={{
             position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
-            background: "#1e293b",
-            borderTop: "1px solid #334155",
+            background: "#1f2937",
+            borderTop: "1px solid #374151",
             display: "flex",
             justifyContent: "space-around",
-            padding: "12px 0",
-            zIndex: 1000,
+            alignItems: "center",
+            padding: "15px 10px",
+            zIndex: 1,
           }}
         >
-
-          {/* HOME */}
-
           <Link
             href="/"
-            style={navStyle}
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontSize: "18px",
+            }}
           >
-            <FaHome />
-            <span>Home</span>
+            🏠 Home
           </Link>
-
-          {/* LIVE */}
 
           <Link
             href="/live"
-            style={navStyle}
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontSize: "18px",
+            }}
           >
-            <FaFutbol />
-            <span>Live</span>
+            🔴 Live
           </Link>
-
-          {/* FIXTURES */}
 
           <Link
             href="/fixtures"
-            style={navStyle}
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontSize: "18px",
+            }}
           >
-            <FaCalendarAlt />
-            <span>Fixtures</span>
+            📅 Fixtures
           </Link>
-
-          {/* FINISHED */}
 
           <Link
             href="/finished"
-            style={navStyle}
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontSize: "18px",
+            }}
           >
-            <FaCheckCircle />
-            <span>Finished</span>
+            ✅ Finished
           </Link>
-
-          {/* NEWS */}
-
-          <Link
-            href="/news"
-            style={navStyle}
-          >
-            <FaNewspaper />
-            <span>News</span>
-          </Link>
-
-          {/* TABLES */}
 
           <Link
             href="/standings"
-            style={navStyle}
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontSize: "18px",
+            }}
           >
-            <FaTable />
-            <span>Tables</span>
+            🏆 Tables
           </Link>
-
-        </nav>
-
+        </div>
       </body>
-
     </html>
-
   );
-
 }
-
-const navStyle = {
-
-  color: "white",
-  textDecoration: "none",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "5px",
-  fontSize: "12px",
-
-};

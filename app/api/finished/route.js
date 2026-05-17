@@ -1,72 +1,53 @@
-const leagues = [
+import { NextResponse } from "next/server";
 
-  4328, // Premier League
-  4335, // La Liga
-  4332, // Serie A
-  4331, // Bundesliga
-  4334, // Ligue 1
-  4337, // Eredivisie
-  4346, // MLS
-  4480, // Champions League
-  4481, // Europa League
-  4391, // Portuguese League
-  4330, // Scottish Premiership
-  4344, // Brazilian Serie A
-
-];
+const API_KEY = "e3f7de2b8a8f97d91582c713eb9651a1";
 
 export async function GET() {
-
   try {
+    const leagues = [
+      39,   // Premier League
+      140,  // La Liga
+      135,  // Serie A
+      78,   // Bundesliga
+      61,   // Ligue 1
+      88,   // Eredivisie
+      94,   // Portuguese League
+      203,  // Turkish League
+      307,  // Saudi League
+      71,   // Brasileirão
+      253,  // MLS
+      262   // Liga MX
+    ];
 
     let allMatches = [];
 
-    for (const leagueId of leagues) {
-
-      try {
-
-        const response = await fetch(
-          `https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=${leagueId}`,
-          {
-            cache: "no-store",
-          }
-        );
-
-        const data = await response.json();
-
-        if (
-          data &&
-          data.events &&
-          Array.isArray(data.events)
-        ) {
-
-          allMatches.push(...data.events);
-
+    for (const league of leagues) {
+      const res = await fetch(
+        `https://v3.football.api-sports.io/fixtures?league=${league}&season=2025&last=10`,
+        {
+          headers: {
+            "x-apisports-key": API_KEY,
+          },
+          cache: "no-store",
         }
+      );
 
-      } catch (error) {
+      const data = await res.json();
 
-        console.log(
-          "League failed:",
-          leagueId
-        );
-
+      if (data.response) {
+        allMatches.push(...data.response);
       }
-
     }
 
-    return Response.json({
-      today: allMatches.slice(0, 25),
-      yesterday: allMatches.slice(25, 50),
+    return NextResponse.json({
+      success: true,
+      events: allMatches,
     });
 
   } catch (error) {
-
-    return Response.json({
-      today: [],
-      yesterday: [],
+    return NextResponse.json({
+      success: false,
+      error: error.message,
     });
-
   }
-
 }

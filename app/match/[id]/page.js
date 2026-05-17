@@ -1,220 +1,256 @@
-async function getMatch(id) {
+"use client";
 
-  const response = await fetch(
-    `https://www.thesportsdb.com/api/v1/json/3/lookupevent.php?id=${id}`,
-    {
-      cache: "no-store",
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+
+export default function MatchDetails() {
+  const params = useParams();
+  const id = params.id;
+
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const res = await fetch(`/api/match?id=${id}`);
+      const result = await res.json();
+
+      setData(result);
     }
-  );
 
-  const data = await response.json();
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
 
-  return data.events?.[0];
-
-}
-
-export default async function MatchDetails({
-  params,
-}) {
-
-  const match = await getMatch(params.id);
-
-  if (!match) {
-
+  if (!data) {
     return (
-
-      <div style={{ padding: "20px" }}>
-
-        <h1>Match Not Found</h1>
-
-      </div>
-
-    );
-
-  }
-
-  return (
-
-    <div
-      style={{
-        padding: "20px",
-        color: "white",
-      }}
-    >
-
-      <h1
-        style={{
-          color: "#39ff14",
-          marginBottom: "30px",
-        }}
-      >
-        Match Details
-      </h1>
-
       <div
         style={{
-          background: "#1e293b",
-          padding: "30px",
-          borderRadius: "20px",
-          border: "1px solid #334155",
+          background: "#111827",
+          color: "white",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "40px",
         }}
       >
+        Loading...
+      </div>
+    );
+  }
 
-        {/* TEAMS */}
+  const match = data.event;
+  const statistics = data.statistics || [];
+  const lineups = data.lineups || [];
+  const events = data.events || [];
 
-        <div
+  return (
+    <div
+      style={{
+        background: "#111827",
+        color: "white",
+        minHeight: "100vh",
+        paddingBottom: "100px",
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          padding: "20px",
+          borderBottom: "1px solid #374151",
+        }}
+      >
+        <h1
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "40px",
-            gap: "20px",
+            color: "#84cc16",
+            fontSize: "42px",
+            fontWeight: "bold",
           }}
         >
-
-          {/* HOME */}
-
-          <div
-            style={{
-              textAlign: "center",
-              width: "35%",
-            }}
-          >
-
-            <img
-              src={
-                match.strHomeTeamBadge ||
-                "https://placehold.co/100?text=Team"
-              }
-              alt=""
-              width="100"
-              height="100"
-            />
-
-            <h2>{match.strHomeTeam}</h2>
-
-          </div>
-
-          {/* SCORE */}
-
-          <div
-            style={{
-              textAlign: "center",
-            }}
-          >
-
-            <h1
-              style={{
-                color: "#39ff14",
-                fontSize: "50px",
-                margin: 0,
-              }}
-            >
-              {match.intHomeScore ?? 0}
-              {" - "}
-              {match.intAwayScore ?? 0}
-            </h1>
-
-            <p
-              style={{
-                color: "#facc15",
-                fontWeight: "bold",
-                fontSize: "20px",
-              }}
-            >
-              {match.strStatus || "Finished"}
-            </p>
-
-          </div>
-
-          {/* AWAY */}
-
-          <div
-            style={{
-              textAlign: "center",
-              width: "35%",
-            }}
-          >
-
-            <img
-              src={
-                match.strAwayTeamBadge ||
-                "https://placehold.co/100?text=Team"
-              }
-              alt=""
-              width="100"
-              height="100"
-            />
-
-            <h2>{match.strAwayTeam}</h2>
-
-          </div>
-
-        </div>
-
-        {/* DETAILS */}
-
-        <div
-          style={{
-            lineHeight: "2",
-            fontSize: "18px",
-          }}
-        >
-
-          <p>
-            <strong>League:</strong>
-            {" "}
-            {match.strLeague || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Season:</strong>
-            {" "}
-            {match.strSeason || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Date:</strong>
-            {" "}
-            {match.dateEvent || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Time:</strong>
-            {" "}
-            {match.strTime || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Venue:</strong>
-            {" "}
-            {match.strVenue || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Country:</strong>
-            {" "}
-            {match.strCountry || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Referee:</strong>
-            {" "}
-            {match.strOfficial || "Unknown"}
-          </p>
-
-          <p>
-            <strong>Status:</strong>
-            {" "}
-            {match.strStatus || "Finished"}
-          </p>
-
-        </div>
-
+          Sports Live
+        </h1>
       </div>
 
+      {/* TEAMS */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          padding: "40px",
+          flexWrap: "wrap",
+          gap: "30px",
+        }}
+      >
+        {/* HOME */}
+        <div style={{ textAlign: "center" }}>
+          <img src={match.teams.home.logo} width="120" />
+
+          <h2>{match.teams.home.name}</h2>
+        </div>
+
+        {/* SCORE */}
+        <div style={{ textAlign: "center" }}>
+          <h1
+            style={{
+              fontSize: "70px",
+              color: "#facc15",
+            }}
+          >
+            {match.goals.home} - {match.goals.away}
+          </h1>
+
+          <p style={{ color: "#22c55e" }}>
+            {match.fixture.status.long}
+          </p>
+        </div>
+
+        {/* AWAY */}
+        <div style={{ textAlign: "center" }}>
+          <img src={match.teams.away.logo} width="120" />
+
+          <h2>{match.teams.away.name}</h2>
+        </div>
+      </div>
+
+      {/* MATCH INFO */}
+      <div
+        style={{
+          background: "#1f2937",
+          margin: "20px",
+          padding: "25px",
+          borderRadius: "20px",
+        }}
+      >
+        <h2 style={{ color: "#facc15" }}>
+          Match Information
+        </h2>
+
+        <p>
+          Date:{" "}
+          {new Date(match.fixture.date).toLocaleString()}
+        </p>
+
+        <p>
+          Referee: {match.fixture.referee || "Unknown"}
+        </p>
+
+        <p>
+          Stadium: {match.fixture.venue?.name || "Unknown"}
+        </p>
+
+        <p>
+          City: {match.fixture.venue?.city || "Unknown"}
+        </p>
+      </div>
+
+      {/* STATISTICS */}
+      <div
+        style={{
+          background: "#1f2937",
+          margin: "20px",
+          padding: "25px",
+          borderRadius: "20px",
+        }}
+      >
+        <h2 style={{ color: "#facc15" }}>
+          Match Statistics
+        </h2>
+
+        {statistics.map((teamStats, index) => (
+          <div
+            key={index}
+            style={{
+              marginTop: "20px",
+            }}
+          >
+            <h3>{teamStats.team.name}</h3>
+
+            {teamStats.statistics.map((stat, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "8px 0",
+                  borderBottom: "1px solid #374151",
+                }}
+              >
+                <span>{stat.type}</span>
+
+                <span>{stat.value || 0}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* LINEUPS */}
+      <div
+        style={{
+          background: "#1f2937",
+          margin: "20px",
+          padding: "25px",
+          borderRadius: "20px",
+        }}
+      >
+        <h2 style={{ color: "#facc15" }}>
+          Starting Lineups
+        </h2>
+
+        {lineups.map((team, index) => (
+          <div
+            key={index}
+            style={{
+              marginTop: "30px",
+            }}
+          >
+            <h3>{team.team.name}</h3>
+
+            {team.startXI.map((player, i) => (
+              <p key={i}>
+                {player.player.number} -{" "}
+                {player.player.name}
+              </p>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* EVENTS */}
+      <div
+        style={{
+          background: "#1f2937",
+          margin: "20px",
+          padding: "25px",
+          borderRadius: "20px",
+        }}
+      >
+        <h2 style={{ color: "#facc15" }}>
+          Match Events
+        </h2>
+
+        {events.map((event, index) => (
+          <div
+            key={index}
+            style={{
+              borderBottom: "1px solid #374151",
+              padding: "10px 0",
+            }}
+          >
+            <p>
+              {event.time.elapsed}' - {event.team.name}
+            </p>
+
+            <p>
+              {event.type} - {event.detail}
+            </p>
+
+            <p>{event.player?.name}</p>
+          </div>
+        ))}
+      </div>
     </div>
-
   );
-
 }

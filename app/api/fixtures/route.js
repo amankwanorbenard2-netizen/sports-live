@@ -1,55 +1,50 @@
+const API_KEY = "e3f7de2b8a8f97d91582c713eb9651a1";
+
 const leagues = [
-
-  4328, // Premier League
-  4335, // La Liga
-  4332, // Serie A
-  4331, // Bundesliga
-  4334, // Ligue 1
-  4337, // Eredivisie
-  4346, // MLS
-  4480, // Champions League
-  4481, // Europa League
-  4391, // Portuguese League
-  4330, // Scottish Premiership
-  4344, // Brazilian Serie A
-
+  39,   // Premier League
+  140,  // La Liga
+  135,  // Serie A
+  78,   // Bundesliga
+  61,   // Ligue 1
+  88,   // Eredivisie
+  94,   // Primeira Liga
+  203,  // Turkish League
+  144,  // Belgian League
+  307,  // Saudi Pro League
+  71,   // Brazil Serie A
+  253   // MLS
 ];
 
 export async function GET() {
-
   try {
+    let allFixtures = [];
 
-    let allMatches = [];
-
-    for (const leagueId of leagues) {
-
-      const response = await fetch(
-        `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${leagueId}`,
+    for (const league of leagues) {
+      const res = await fetch(
+        `https://v3.football.api-sports.io/fixtures?league=${league}&season=2025&next=3`,
         {
+          headers: {
+            "x-apisports-key": API_KEY,
+          },
           cache: "no-store",
         }
       );
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (data.events) {
-
-        allMatches.push(...data.events);
-
+      if (data.response) {
+        allFixtures.push(...data.response);
       }
-
     }
 
     return Response.json({
-      matches: allMatches,
+      success: true,
+      events: allFixtures,
     });
-
   } catch (error) {
-
     return Response.json({
-      matches: [],
+      success: false,
+      error: error.message,
     });
-
   }
-
 }

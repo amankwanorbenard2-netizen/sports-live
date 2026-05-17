@@ -4,200 +4,314 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function FixturesPage() {
-
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  async function fetchFixtures() {
+  useEffect(() => {
+    async function fetchFixtures() {
+      try {
+        const res = await fetch("/api/fixtures");
+        const data = await res.json();
 
-    try {
+        setMatches(data.events || []);
+      } catch (error) {
+        console.log(error);
+      }
 
-      const response = await fetch("/api/fixtures");
-
-      const data = await response.json();
-
-      setMatches(data.matches || []);
-
-    } catch (error) {
-
-      console.log(error);
-
-    } finally {
-
-      setLoading(false);
-
+      // FORCE LOADING ANIMATION TO SHOW
+      setTimeout(() => {
+        setLoading(false);
+      }, 400);
     }
 
-  }
-
-  useEffect(() => {
-
     fetchFixtures();
-
   }, []);
 
+  // LOADING SCREEN
   if (loading) {
-
     return (
+      <div
+        style={{
+          background: "#111827",
+          minHeight: "100vh",
+          padding: "20px",
+        }}
+      >
+        <h1
+          style={{
+            color: "#3b82f6",
+            fontSize: "55px",
+            marginBottom: "30px",
+          }}
+        >
+          📅 Fixtures
+        </h1>
 
-      <div style={{ padding: "20px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(320px,1fr))",
+            gap: "20px",
+          }}
+        >
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div
+              key={item}
+              style={{
+                background: "#1f2937",
+                borderRadius: "20px",
+                padding: "20px",
+                height: "230px",
+                animation:
+                  "pulse 1.5s infinite",
+              }}
+            >
+              <div
+                style={{
+                  background: "#374151",
+                  height: "25px",
+                  width: "60%",
+                  borderRadius: "10px",
+                  marginBottom: "30px",
+                }}
+              />
 
-        <h1>Loading Fixtures...</h1>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    background: "#374151",
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                  }}
+                />
 
+                <div
+                  style={{
+                    background: "#374151",
+                    width: "90px",
+                    height: "40px",
+                    borderRadius: "10px",
+                  }}
+                />
+
+                <div
+                  style={{
+                    background: "#374151",
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <style jsx>{`
+          @keyframes pulse {
+            0% {
+              opacity: 0.5;
+            }
+
+            50% {
+              opacity: 1;
+            }
+
+            100% {
+              opacity: 0.5;
+            }
+          }
+        `}</style>
       </div>
-
     );
-
   }
 
   return (
-
-    <div style={{ padding: "20px" }}>
-
+    <div
+      style={{
+        background: "#111827",
+        color: "white",
+        minHeight: "100vh",
+        padding: "20px",
+        paddingBottom: "140px",
+      }}
+    >
       <h1
         style={{
-          color: "#39ff14",
-          fontSize: "40px",
+          color: "#3b82f6",
+          fontSize: "55px",
           marginBottom: "30px",
         }}
       >
-        Upcoming Fixtures
+        📅 Fixtures
       </h1>
 
-      {matches.length === 0 && (
-
-        <h2>No Upcoming Fixtures</h2>
-
-      )}
-
-      {matches.map((match) => (
-
-        <Link
-          key={match.idEvent}
-          href={`/match/${match.idEvent}`}
-          style={{
-            textDecoration: "none",
-            color: "white",
-          }}
-        >
-
-          <div
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit,minmax(320px,1fr))",
+          gap: "20px",
+        }}
+      >
+        {matches.map((match) => (
+          <Link
+            key={match.fixture.id}
+            href={`/match/${match.fixture.id}`}
             style={{
-              background: "#1e293b",
-              borderRadius: "15px",
-              padding: "20px",
-              marginBottom: "20px",
-              border: "1px solid #334155",
-              cursor: "pointer",
+              textDecoration: "none",
             }}
           >
-
-            {/* LEAGUE */}
-
-            <p
-              style={{
-                color: "#94a3b8",
-                marginBottom: "20px",
-              }}
-            >
-              {match.strLeague}
-            </p>
-
-            {/* MATCH */}
-
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "10px",
+                background: "#1f2937",
+                borderRadius: "20px",
+                padding: "20px",
+                border: "1px solid #374151",
+                transition: "0.3s",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform =
+                  "translateY(-8px) scale(1.02)";
+
+                e.currentTarget.style.boxShadow =
+                  "0 0 25px rgba(59,130,246,0.5)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform =
+                  "translateY(0px) scale(1)";
+
+                e.currentTarget.style.boxShadow =
+                  "none";
               }}
             >
-
-              {/* HOME */}
-
+              {/* LEAGUE */}
               <div
                 style={{
-                  textAlign: "center",
-                  width: "35%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
                 }}
               >
-
                 <img
-                  src={
-                    match.strHomeTeamBadge ||
-                    "https://placehold.co/70"
-                  }
-                  alt=""
-                  width="70"
-                  height="70"
+                  src={match.league.logo}
+                  width="28"
                 />
 
-                <h3>{match.strHomeTeam}</h3>
-
-              </div>
-
-              {/* TIME */}
-
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
-
-                <h1
+                <span
                   style={{
-                    color: "#39ff14",
-                    margin: 0,
-                    fontSize: "28px",
+                    color: "#cbd5e1",
                   }}
                 >
-                  VS
-                </h1>
-
-                <p
-                  style={{
-                    color: "#facc15",
-                  }}
-                >
-                  {match.strTime || "TBD"}
-                </p>
-
+                  {match.league.name}
+                </span>
               </div>
 
-              {/* AWAY */}
-
+              {/* TEAMS */}
               <div
                 style={{
-                  textAlign: "center",
-                  width: "35%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
+                {/* HOME */}
+                <div
+                  style={{
+                    width: "40%",
+                    textAlign: "center",
+                  }}
+                >
+                  <img
+                    src={match.teams.home.logo}
+                    width="70"
+                  />
 
-                <img
-                  src={
-                    match.strAwayTeamBadge ||
-                    "https://placehold.co/70"
-                  }
-                  alt=""
-                  width="70"
-                  height="70"
-                />
+                  <p
+                    style={{
+                      marginTop: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {match.teams.home.name}
+                  </p>
+                </div>
 
-                <h3>{match.strAwayTeam}</h3>
+                {/* TIME */}
+                <div
+                  style={{
+                    textAlign: "center",
+                  }}
+                >
+                  <h2
+                    style={{
+                      color: "#3b82f6",
+                      fontSize: "24px",
+                    }}
+                  >
+                    VS
+                  </h2>
 
+                  <p
+                    style={{
+                      color: "#9ca3af",
+                    }}
+                  >
+                    {new Date(
+                      match.fixture.date
+                    ).toLocaleTimeString()}
+                  </p>
+                </div>
+
+                {/* AWAY */}
+                <div
+                  style={{
+                    width: "40%",
+                    textAlign: "center",
+                  }}
+                >
+                  <img
+                    src={match.teams.away.logo}
+                    width="70"
+                  />
+
+                  <p
+                    style={{
+                      marginTop: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {match.teams.away.name}
+                  </p>
+                </div>
               </div>
 
+              {/* DATE */}
+              <div
+                style={{
+                  marginTop: "20px",
+                  textAlign: "center",
+                  color: "#9ca3af",
+                }}
+              >
+                {new Date(
+                  match.fixture.date
+                ).toLocaleDateString()}
+              </div>
             </div>
-
-          </div>
-
-        </Link>
-
-      ))}
-
+          </Link>
+        ))}
+      </div>
     </div>
-
   );
-
 }

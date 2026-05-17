@@ -4,245 +4,140 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function LivePage() {
-
   const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchLiveMatches() {
-
-    try {
-
-      const response = await fetch("/api/live");
-
-      const data = await response.json();
-
-      setMatches(data.matches || []);
-
-    } catch (error) {
-
-      console.log(error);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  }
 
   useEffect(() => {
-
-    fetchLiveMatches();
-
-    const interval = setInterval(() => {
-
-      fetchLiveMatches();
-
-    }, 30000);
-
-    return () => clearInterval(interval);
-
+    fetch("/api/live")
+      .then((res) => res.json())
+      .then((data) => {
+        setMatches(data.events || []);
+      });
   }, []);
 
-  if (loading) {
-
-    return (
-
-      <div style={{ padding: "20px" }}>
-
-        <h1>Loading Live Matches...</h1>
-
-      </div>
-
-    );
-
-  }
-
   return (
-
-    <div style={{ padding: "20px" }}>
-
+    <div
+      style={{
+        background: "#111827",
+        minHeight: "100vh",
+        padding: "20px",
+        color: "white",
+      }}
+    >
       <h1
         style={{
-          color: "#39ff14",
-          fontSize: "40px",
+          fontSize: "42px",
+          fontWeight: "bold",
+          color: "#22c55e",
           marginBottom: "30px",
         }}
       >
-        Live Football Matches
+        🔴 Live Matches
       </h1>
 
-      {matches.length === 0 && (
-
-        <h2>No Live Matches Available</h2>
-
-      )}
-
-      {matches.map((match) => (
-
-        <Link
-          key={match.idEvent}
-          href={`/match/${match.idEvent}`}
+      {matches.length === 0 ? (
+        <div
           style={{
-            textDecoration: "none",
-            color: "white",
+            background: "#1f2937",
+            padding: "30px",
+            borderRadius: "15px",
+            textAlign: "center",
+            fontSize: "22px",
           }}
         >
-
-          <div
-            style={{
-              background: "#1e293b",
-              borderRadius: "15px",
-              padding: "20px",
-              marginBottom: "20px",
-              border: "1px solid #334155",
-              cursor: "pointer",
-            }}
-          >
-
-            {/* LIVE STATUS */}
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "20px",
-              }}
+          No live matches currently.
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+            gap: "20px",
+          }}
+        >
+          {matches.map((match) => (
+            <Link
+              key={match.fixture.id}
+              href={`/match/${match.fixture.id}`}
+              style={{ textDecoration: "none" }}
             >
-
               <div
                 style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  background: "red",
+                  background: "#1f2937",
+                  borderRadius: "18px",
+                  padding: "20px",
+                  transition: "0.3s",
+                  cursor: "pointer",
+                  border: "2px solid transparent",
                 }}
-              />
-
-              <span
-                style={{
-                  color: "#39ff14",
-                  fontWeight: "bold",
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.04)";
+                  e.currentTarget.style.border =
+                    "2px solid #22c55e";
                 }}
-              >
-                LIVE
-              </span>
-
-              <span
-                style={{
-                  color: "#facc15",
-                  fontWeight: "bold",
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.border =
+                    "2px solid transparent";
                 }}
               >
-                {match.strStatus || ""}
-              </span>
-
-            </div>
-
-            {/* MATCH ROW */}
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "10px",
-              }}
-            >
-
-              {/* HOME */}
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "35%",
-                  textAlign: "center",
-                }}
-              >
-
-                <img
-                  src={
-                    match.strHomeTeamBadge ||
-                    "https://placehold.co/70"
-                  }
-                  alt=""
-                  width="70"
-                  height="70"
-                />
-
-                <h3>{match.strHomeTeam}</h3>
-
-              </div>
-
-              {/* SCORE */}
-
-              <div
-                style={{
-                  textAlign: "center",
-                }}
-              >
-
-                <h1
+                <div
                   style={{
-                    color: "#39ff14",
-                    fontSize: "40px",
-                    margin: 0,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  {match.intHomeScore ?? 0}
-                  {" - "}
-                  {match.intAwayScore ?? 0}
-                </h1>
+                  <div style={{ textAlign: "center" }}>
+                    <img
+                      src={match.teams.home.logo}
+                      width="70"
+                    />
+                    <h2>{match.teams.home.name}</h2>
+                  </div>
 
-                <p
+                  <div style={{ textAlign: "center" }}>
+                    <h1
+                      style={{
+                        color: "#22c55e",
+                        fontSize: "40px",
+                      }}
+                    >
+                      {match.goals.home} - {match.goals.away}
+                    </h1>
+
+                    <p
+                      style={{
+                        color: "#facc15",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {match.fixture.status.elapsed}'
+                    </p>
+                  </div>
+
+                  <div style={{ textAlign: "center" }}>
+                    <img
+                      src={match.teams.away.logo}
+                      width="70"
+                    />
+                    <h2>{match.teams.away.name}</h2>
+                  </div>
+                </div>
+
+                <div
                   style={{
-                    color: "#94a3b8",
+                    marginTop: "15px",
+                    textAlign: "center",
+                    color: "#9ca3af",
                   }}
                 >
-                  {match.strLeague}
-                </p>
-
+                  {match.league.name}
+                </div>
               </div>
-
-              {/* AWAY */}
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "35%",
-                  textAlign: "center",
-                }}
-              >
-
-                <img
-                  src={
-                    match.strAwayTeamBadge ||
-                    "https://placehold.co/70"
-                  }
-                  alt=""
-                  width="70"
-                  height="70"
-                />
-
-                <h3>{match.strAwayTeam}</h3>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </Link>
-
-      ))}
-
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
-
   );
-
 }
