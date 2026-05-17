@@ -3,25 +3,189 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-export default function MatchDetails() {
+function PlayerCard({
+  player,
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection:
+          "column",
+        alignItems:
+          "center",
+        width: "90px",
+      }}
+    >
+      <div
+        style={{
+          background:
+            "#facc15",
+          color: "black",
+          fontWeight:
+            "900",
+          fontSize: "13px",
+          padding: "4px 8px",
+          borderRadius: "8px",
+          marginBottom: "-8px",
+          zIndex: 2,
+        }}
+      >
+        6.5
+      </div>
+
+      <div
+        className="pitch-player"
+        style={{
+          width: "74px",
+          height: "74px",
+          borderRadius:
+            "50%",
+          overflow:
+            "hidden",
+          border:
+            "3px solid white",
+          background:
+            "white",
+        }}
+      >
+        <img
+          src={`https://media.api-sports.io/football/players/${player?.player?.id}.png`}
+          width="74"
+          height="74"
+          alt=""
+        />
+      </div>
+
+      <p
+        style={{
+          marginTop: "8px",
+          fontSize: "12px",
+          fontWeight:
+            "bold",
+          textAlign:
+            "center",
+          color: "white",
+        }}
+      >
+        {
+          player?.player
+            ?.name
+        }
+      </p>
+
+      <span
+        style={{
+          color: "#d1d5db",
+          fontSize: "11px",
+        }}
+      >
+        #
+        {
+          player?.player
+            ?.number
+        }
+      </span>
+    </div>
+  );
+}
+
+export default function MatchPage() {
   const params = useParams();
 
-  const [match, setMatch] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [match, setMatch] =
+    useState(null);
+
+  const [players, setPlayers] =
+    useState([]);
+
+  const [statistics, setStatistics] =
+    useState([]);
+
+  const [lineups, setLineups] =
+    useState([]);
+
+  const [events, setEvents] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
+    if (!params?.id) return;
+
     async function fetchMatch() {
       try {
-        const res = await fetch(
-          `/api/match?id=${params.id}`
-        );
+        setLoading(true);
 
-        const data = await res.json();
+        // MATCH
+        const matchRes =
+          await fetch(
+            `/api/match?id=${params.id}`
+          );
+
+        const matchData =
+          await matchRes.json();
 
         setMatch(
-          data.response
-            ? data.response[0]
-            : data
+          matchData?.response?.[0] ||
+            null
+        );
+
+        // PLAYERS
+        const playersRes =
+          await fetch(
+            `/api/match?id=${params.id}&type=players`
+          );
+
+        const playersData =
+          await playersRes.json();
+
+        setPlayers(
+          playersData?.response ||
+            []
+        );
+
+        // STATISTICS
+        const statsRes =
+          await fetch(
+            `/api/match?id=${params.id}&type=statistics`
+          );
+
+        const statsData =
+          await statsRes.json();
+
+        setStatistics(
+          statsData?.response ||
+            []
+        );
+
+        // LINEUPS
+        const lineupsRes =
+          await fetch(
+            `/api/match?id=${params.id}&type=lineups`
+          );
+
+        const lineupsData =
+          await lineupsRes.json();
+
+        setLineups(
+          lineupsData?.response ||
+            []
+        );
+
+        // EVENTS
+        const eventsRes =
+          await fetch(
+            `/api/match?id=${params.id}&type=events`
+          );
+
+        const eventsData =
+          await eventsRes.json();
+
+        setEvents(
+          eventsData?.response ||
+            []
         );
       } catch (error) {
         console.log(error);
@@ -30,22 +194,32 @@ export default function MatchDetails() {
       setLoading(false);
     }
 
-    if (params.id) {
-      fetchMatch();
-    }
-  }, [params.id]);
+    fetchMatch();
 
-  if (loading) {
+    const interval =
+      setInterval(() => {
+        fetchMatch();
+      }, 60000);
+
+    return () =>
+      clearInterval(interval);
+  }, [params]);
+
+  if (loading || !match) {
     return (
       <div
         style={{
-          background: "#111827",
-          color: "white",
+          background:
+            "#020617",
           minHeight: "100vh",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "32px",
+          justifyContent:
+            "center",
+          alignItems:
+            "center",
+          color: "white",
+          fontSize: "30px",
+          fontWeight: "bold",
         }}
       >
         Loading Match...
@@ -53,225 +227,28 @@ export default function MatchDetails() {
     );
   }
 
-  if (!match || !match.teams) {
-    return (
-      <div
-        style={{
-          background: "#111827",
-          color: "white",
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "32px",
-        }}
-      >
-        Match Not Found
-      </div>
-    );
-  }
-
-  function groupPlayers(startXI, formation) {
-    if (!formation) return [startXI];
-
-    const parts = formation
-      .split("-")
-      .map(Number);
-
-    const grouped = [];
-
-    grouped.push([startXI[0]]);
-
-    let currentIndex = 1;
-
-    for (let count of parts) {
-      grouped.push(
-        startXI.slice(
-          currentIndex,
-          currentIndex + count
-        )
-      );
-
-      currentIndex += count;
-    }
-
-    return grouped;
-  }
-
-  const homeLineup =
-    match.lineups?.[0];
-
-  const awayLineup =
-    match.lineups?.[1];
-
-  const homeRows = homeLineup
-    ? groupPlayers(
-        homeLineup.startXI,
-        homeLineup.formation
-      )
-    : [];
-
-  const awayRows = awayLineup
-    ? groupPlayers(
-        awayLineup.startXI,
-        awayLineup.formation
-      ).reverse()
-    : [];
-
-  function renderPlayer(playerData) {
-    const rating = parseFloat(
-      playerData.player.rating || 0
-    );
-
-    let ratingColor = "#9ca3af";
-
-    if (rating >= 8) {
-      ratingColor = "#22c55e";
-    } else if (rating >= 7) {
-      ratingColor = "#facc15";
-    } else if (rating >= 6) {
-      ratingColor = "#fb923c";
-    } else if (rating > 0) {
-      ratingColor = "#ef4444";
-    }
-
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          width: "62px",
-        }}
-      >
-        {/* PLAYER */}
-        <div
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            background: "#facc15",
-            color: "#111827",
-            display: "flex",
-            justifyContent:
-              "center",
-            alignItems: "center",
-            fontWeight: "bold",
-            fontSize: "13px",
-            margin: "auto",
-            border:
-              "3px solid white",
-            position: "relative",
-            boxShadow:
-              "0 0 10px rgba(0,0,0,0.4)",
-          }}
-        >
-          {
-            playerData.player
-              .number
-          }
-
-          {/* RATING */}
-          <div
-            style={{
-              position:
-                "absolute",
-              bottom: "-6px",
-              right: "-6px",
-              background:
-                rating > 0
-                  ? ratingColor
-                  : "#6b7280",
-              color: "white",
-              fontSize: "9px",
-              fontWeight:
-                "bold",
-              borderRadius:
-                "999px",
-              padding:
-                "2px 5px",
-              border:
-                "2px solid #111827",
-              minWidth: "22px",
-              textAlign:
-                "center",
-            }}
-          >
-            {rating > 0
-              ? rating.toFixed(1)
-              : "-"}
-          </div>
-        </div>
-
-        {/* NAME */}
-        <p
-          style={{
-            marginTop: "8px",
-            fontSize: "10px",
-            fontWeight: "bold",
-            color: "white",
-            lineHeight: "13px",
-            wordBreak:
-              "break-word",
-          }}
-        >
-          {
-            playerData.player
-              .name
-          }
-        </p>
-      </div>
-    );
-  }
-
-  function renderRows(rows) {
-    return rows.map(
-      (row, rowIndex) => (
-        <div
-          key={rowIndex}
-          style={{
-            display: "flex",
-            justifyContent:
-              "space-evenly",
-            alignItems: "center",
-            marginBottom: "24px",
-            flexWrap: "nowrap",
-            gap: "4px",
-            width: "100%",
-          }}
-        >
-          {row.map(
-            (
-              playerData,
-              idx
-            ) => (
-              <div key={idx}>
-                {renderPlayer(
-                  playerData
-                )}
-              </div>
-            )
-          )}
-        </div>
-      )
-    );
-  }
-
   return (
     <div
       style={{
-        background: "#111827",
-        color: "white",
+        background:
+          "linear-gradient(to bottom,#020617,#111827)",
         minHeight: "100vh",
-        padding: "14px",
+        padding: "16px",
         paddingBottom: "120px",
+        color: "white",
       }}
     >
-      {/* SCORE */}
+      {/* HEADER */}
       <div
         style={{
-          background: "#1f2937",
-          borderRadius: "20px",
-          padding: "20px",
+          background:
+            "linear-gradient(to right,#1e293b,#0f172a)",
+          borderRadius:
+            "24px",
+          padding: "24px",
           marginBottom: "30px",
+          boxShadow:
+            "0 0 25px rgba(0,0,0,0.45)",
         }}
       >
         <div
@@ -279,633 +256,781 @@ export default function MatchDetails() {
             display: "flex",
             justifyContent:
               "space-between",
-            alignItems: "center",
-            textAlign: "center",
-            gap: "12px",
+            alignItems:
+              "center",
           }}
         >
-          <div style={{ flex: 1 }}>
+          {/* HOME */}
+          <div
+            style={{
+              flex: 1,
+              textAlign:
+                "center",
+            }}
+          >
             <img
-              src={match.teams.home.logo}
-              width="55"
+              src={
+                match?.teams?.home
+                  ?.logo
+              }
+              width="80"
               alt=""
             />
 
             <h2
               style={{
-                fontSize: "18px",
+                marginTop: "12px",
               }}
             >
-              {match.teams.home.name}
+              {match?.teams?.home
+                ?.name}
             </h2>
           </div>
 
-          <div>
+          {/* SCORE */}
+          <div
+            style={{
+              textAlign:
+                "center",
+              minWidth: "150px",
+            }}
+          >
+            <div
+              style={{
+                background:
+                  "#ef4444",
+                display:
+                  "inline-block",
+                padding:
+                  "6px 14px",
+                borderRadius:
+                  "999px",
+                fontWeight:
+                  "bold",
+                marginBottom:
+                  "10px",
+                animation:
+                  "pulse 1s infinite",
+              }}
+            >
+              {match?.fixture
+                ?.status?.long}
+            </div>
+
             <h1
               style={{
+                fontSize: "54px",
                 color: "#22c55e",
-                fontSize: "38px",
-                margin: 0,
               }}
             >
-              {match.goals.home} -{" "}
-              {match.goals.away}
+              {match?.goals
+                ?.home ?? 0}{" "}
+              -{" "}
+              {match?.goals
+                ?.away ?? 0}
             </h1>
-
-            <p
-              style={{
-                color: "#9ca3af",
-                fontSize: "14px",
-              }}
-            >
-              {
-                match.fixture.status
-                  .long
-              }
-            </p>
           </div>
 
-          <div style={{ flex: 1 }}>
+          {/* AWAY */}
+          <div
+            style={{
+              flex: 1,
+              textAlign:
+                "center",
+            }}
+          >
             <img
-              src={match.teams.away.logo}
-              width="55"
+              src={
+                match?.teams?.away
+                  ?.logo
+              }
+              width="80"
               alt=""
             />
 
             <h2
               style={{
-                fontSize: "18px",
+                marginTop: "12px",
               }}
             >
-              {match.teams.away.name}
+              {match?.teams?.away
+                ?.name}
             </h2>
           </div>
         </div>
       </div>
 
-      {/* MATCH INFO */}
-      <div
+      {/* EVENTS */}
+      <h2
         style={{
-          background: "#1f2937",
-          borderRadius: "20px",
-          padding: "20px",
-          marginBottom: "30px",
+          color: "#facc15",
+          fontSize: "30px",
+          marginBottom: "20px",
         }}
       >
-        <h2
-          style={{
-            color: "#facc15",
-            marginBottom: "18px",
-          }}
-        >
-          Match Information
-        </h2>
+        Match Events
+      </h2>
 
-        <p>
-          <strong>Date:</strong>{" "}
-          {new Date(
-            match.fixture.date
-          ).toLocaleString()}
-        </p>
-
-        <p>
-          <strong>Referee:</strong>{" "}
-          {match.fixture.referee ||
-            "Unknown"}
-        </p>
-
-        <p>
-          <strong>Stadium:</strong>{" "}
-          {match.fixture.venue.name}
-        </p>
-
-        <p>
-          <strong>City:</strong>{" "}
-          {match.fixture.venue.city}
-        </p>
-      </div>
-
-      {/* STATISTICS */}
       <div
         style={{
-          marginBottom: "35px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+          marginBottom: "40px",
         }}
       >
-        <h2
-          style={{
-            color: "#3b82f6",
-            marginBottom: "18px",
-          }}
-        >
-          Match Statistics
-        </h2>
+        {events.map(
+          (event, index) => {
+            let icon = "⚽";
 
-        {match.statistics &&
-        match.statistics.length >
-          1 ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit,minmax(160px,1fr))",
-              gap: "12px",
-            }}
-          >
-            {match.statistics[0].statistics.map(
-              (
-                stat,
-                index
-              ) => (
+            if (
+              event.type ===
+              "Card"
+            ) {
+              icon =
+                event.detail ===
+                "Yellow Card"
+                  ? "🟨"
+                  : "🟥";
+            }
+
+            if (
+              event.type ===
+              "subst"
+            ) {
+              icon = "🔄";
+            }
+
+            return (
+              <div
+                key={index}
+                className="event-card"
+                style={{
+                  background:
+                    "#1e293b",
+                  borderRadius:
+                    "18px",
+                  padding:
+                    "16px",
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems:
+                    "center",
+                }}
+              >
                 <div
-                  key={index}
                   style={{
-                    background:
-                      "#1f2937",
-                    padding:
-                      "16px",
-                    borderRadius:
-                      "16px",
-                    textAlign:
+                    display: "flex",
+                    alignItems:
                       "center",
+                    gap: "14px",
                   }}
                 >
-                  <h3
+                  <div
                     style={{
-                      color:
-                        "#facc15",
                       fontSize:
-                        "14px",
-                      marginBottom:
-                        "12px",
+                        "28px",
                     }}
                   >
-                    {stat.type}
-                  </h3>
+                    {icon}
+                  </div>
+
+                  <div>
+                    <h3
+                      style={{
+                        margin: 0,
+                      }}
+                    >
+                      {
+                        event
+                          ?.player
+                          ?.name
+                      }
+                    </h3>
+
+                    <p
+                      style={{
+                        margin: 0,
+                        color:
+                          "#94a3b8",
+                        fontSize:
+                          "13px",
+                      }}
+                    >
+                      {
+                        event
+                          ?.team
+                          ?.name
+                      }
+                    </p>
+
+                    {event
+                      ?.assist
+                      ?.name && (
+                      <p
+                        style={{
+                          margin: 0,
+                          color:
+                            "#22c55e",
+                          fontSize:
+                            "12px",
+                        }}
+                      >
+                        Assist:{" "}
+                        {
+                          event
+                            ?.assist
+                            ?.name
+                        }
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background:
+                      "#facc15",
+                    color:
+                      "black",
+                    padding:
+                      "8px 14px",
+                    borderRadius:
+                      "999px",
+                    fontWeight:
+                      "900",
+                  }}
+                >
+                  {event?.time
+                    ?.elapsed ||
+                    0}
+                  '
+                </div>
+              </div>
+            );
+          }
+        )}
+      </div>
+
+      {/* PLAYER RATINGS */}
+      <h2
+        style={{
+          color: "#facc15",
+          fontSize: "30px",
+          marginBottom: "20px",
+        }}
+      >
+        Player Ratings
+      </h2>
+
+      {players?.map(
+        (team, index) => (
+          <div
+            key={index}
+            style={{
+              marginBottom:
+                "30px",
+            }}
+          >
+            <h3
+              style={{
+                color: "#22c55e",
+                marginBottom:
+                  "16px",
+              }}
+            >
+              {team?.team?.name}
+            </h3>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit,minmax(220px,1fr))",
+                gap: "14px",
+              }}
+            >
+              {team?.players?.map(
+                (
+                  player,
+                  playerIndex
+                ) => (
+                  <div
+                    key={
+                      playerIndex
+                    }
+                    className="player-card"
+                    style={{
+                      background:
+                        "#1e293b",
+                      borderRadius:
+                        "18px",
+                      padding:
+                        "16px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display:
+                          "flex",
+                        justifyContent:
+                          "space-between",
+                        alignItems:
+                          "center",
+                      }}
+                    >
+                      <div>
+                        <h4>
+                          {player
+                            ?.player
+                            ?.name}
+                        </h4>
+
+                        <p
+                          style={{
+                            color:
+                              "#94a3b8",
+                          }}
+                        >
+                          #
+                          {player
+                            ?.player
+                            ?.number}
+                        </p>
+                      </div>
+
+                      <div
+                        style={{
+                          background:
+                            "#22c55e",
+                          color:
+                            "black",
+                          width:
+                            "44px",
+                          height:
+                            "44px",
+                          borderRadius:
+                            "50%",
+                          display:
+                            "flex",
+                          justifyContent:
+                            "center",
+                          alignItems:
+                            "center",
+                          fontWeight:
+                            "900",
+                        }}
+                      >
+                        {player
+                          ?.statistics?.[0]
+                          ?.games
+                          ?.rating ||
+                          "-"}
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        )
+      )}
+
+      {/* STATISTICS */}
+      <h2
+        style={{
+          color: "#facc15",
+          fontSize: "30px",
+          marginBottom: "20px",
+        }}
+      >
+        Match Statistics
+      </h2>
+
+      {statistics?.map(
+        (team, index) => (
+          <div
+            key={index}
+            style={{
+              background:
+                "#1e293b",
+              borderRadius:
+                "18px",
+              padding: "18px",
+              marginBottom:
+                "18px",
+            }}
+          >
+            <h3
+              style={{
+                color: "#22c55e",
+                marginBottom:
+                  "14px",
+              }}
+            >
+              {team?.team?.name}
+            </h3>
+
+            {team?.statistics?.map(
+              (
+                stat,
+                statIndex
+              ) => (
+                <div
+                  key={statIndex}
+                  style={{
+                    display:
+                      "flex",
+                    justifyContent:
+                      "space-between",
+                    marginBottom:
+                      "10px",
+                  }}
+                >
+                  <span>
+                    {stat?.type}
+                  </span>
+
+                  <strong>
+                    {stat?.value ||
+                      0}
+                  </strong>
+                </div>
+              )
+            )}
+          </div>
+        )
+      )}
+
+      {/* LINEUPS */}
+      <h2
+        style={{
+          color: "#facc15",
+          fontSize: "30px",
+          marginBottom: "20px",
+          marginTop: "40px",
+        }}
+      >
+        Match Lineups
+      </h2>
+
+      {lineups.length >= 2 && (
+        <div
+          style={{
+            background:
+              "linear-gradient(to bottom,#15803d,#166534)",
+            borderRadius:
+              "30px",
+            padding:
+              "30px 15px",
+            position:
+              "relative",
+            overflow:
+              "hidden",
+            border:
+              "4px solid rgba(255,255,255,0.08)",
+            minHeight: "1400px",
+          }}
+        >
+          {/* CENTER LINE */}
+          <div
+            style={{
+              position:
+                "absolute",
+              top: "50%",
+              left: 0,
+              right: 0,
+              height: "3px",
+              background:
+                "rgba(255,255,255,0.25)",
+            }}
+          />
+
+          {/* CENTER CIRCLE */}
+          <div
+            style={{
+              position:
+                "absolute",
+              top: "50%",
+              left: "50%",
+              transform:
+                "translate(-50%,-50%)",
+              width: "180px",
+              height: "180px",
+              borderRadius:
+                "50%",
+              border:
+                "3px solid rgba(255,255,255,0.25)",
+            }}
+          />
+
+          {/* HOME */}
+          <div
+            style={{
+              marginBottom:
+                "180px",
+            }}
+          >
+            {(() => {
+              const formation =
+                lineups[0]
+                  ?.formation ||
+                "4-3-3";
+
+              const rows =
+                formation
+                  .split("-")
+                  .map(Number);
+
+              const players =
+                lineups[0]
+                  ?.startXI ||
+                [];
+
+              const goalkeeper =
+                players[0];
+
+              let start = 1;
+
+              return (
+                <>
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      justifyContent:
+                        "center",
+                      marginBottom:
+                        "50px",
+                    }}
+                  >
+                    <PlayerCard
+                      player={
+                        goalkeeper
+                      }
+                    />
+                  </div>
+
+                  {rows.map(
+                    (
+                      rowCount,
+                      rowIndex
+                    ) => {
+                      const rowPlayers =
+                        players.slice(
+                          start,
+                          start +
+                            rowCount
+                        );
+
+                      start +=
+                        rowCount;
+
+                      return (
+                        <div
+                          key={
+                            rowIndex
+                          }
+                          style={{
+                            display:
+                              "flex",
+                            justifyContent:
+                              "space-evenly",
+                            alignItems:
+                              "center",
+                            marginBottom:
+                              "55px",
+                          }}
+                        >
+                          {rowPlayers.map(
+                            (
+                              player,
+                              i
+                            ) => (
+                              <PlayerCard
+                                key={
+                                  i
+                                }
+                                player={
+                                  player
+                                }
+                              />
+                            )
+                          )}
+                        </div>
+                      );
+                    }
+                  )}
+                </>
+              );
+            })()}
+          </div>
+
+          {/* AWAY */}
+          <div>
+            {(() => {
+              const formation =
+                lineups[1]
+                  ?.formation ||
+                "4-3-3";
+
+              const rows =
+                formation
+                  .split("-")
+                  .map(Number);
+
+              const players =
+                lineups[1]
+                  ?.startXI ||
+                [];
+
+              const goalkeeper =
+                players[0];
+
+              let start = 1;
+
+              return (
+                <>
+                  {rows
+                    .slice()
+                    .reverse()
+                    .map(
+                      (
+                        rowCount,
+                        rowIndex
+                      ) => {
+                        const rowPlayers =
+                          players.slice(
+                            start,
+                            start +
+                              rowCount
+                          );
+
+                        start +=
+                          rowCount;
+
+                        return (
+                          <div
+                            key={
+                              rowIndex
+                            }
+                            style={{
+                              display:
+                                "flex",
+                              justifyContent:
+                                "space-evenly",
+                              alignItems:
+                                "center",
+                              marginBottom:
+                                "55px",
+                            }}
+                          >
+                            {rowPlayers.map(
+                              (
+                                player,
+                                i
+                              ) => (
+                                <PlayerCard
+                                  key={
+                                    i
+                                  }
+                                  player={
+                                    player
+                                  }
+                                />
+                              )
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
 
                   <div
                     style={{
                       display:
                         "flex",
                       justifyContent:
-                        "space-between",
-                      alignItems:
                         "center",
-                      gap: "10px",
+                      marginTop:
+                        "40px",
                     }}
                   >
-                    <span
-                      style={{
-                        color:
-                          "#22c55e",
-                        fontWeight:
-                          "bold",
-                      }}
-                    >
-                      {stat.value ||
-                        0}
-                    </span>
-
-                    <span
-                      style={{
-                        color:
-                          "#9ca3af",
-                        fontSize:
-                          "12px",
-                      }}
-                    >
-                      vs
-                    </span>
-
-                    <span
-                      style={{
-                        color:
-                          "#ef4444",
-                        fontWeight:
-                          "bold",
-                      }}
-                    >
-                      {match
-                        .statistics[1]
-                        ?.statistics[
-                        index
-                      ]?.value ||
-                        0}
-                    </span>
+                    <PlayerCard
+                      player={
+                        goalkeeper
+                      }
+                    />
                   </div>
-                </div>
-              )
-            )}
+                </>
+              );
+            })()}
           </div>
-        ) : (
-          <div
-            style={{
-              background:
-                "#1f2937",
-              padding: "25px",
-              borderRadius:
-                "18px",
-              textAlign: "center",
-              color: "#9ca3af",
-            }}
-          >
-            Statistics not available
-            for this match.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* MATCH EVENTS */}
-      {match.events &&
-        match.events.length >
-          0 && (
-          <div
-            style={{
-              marginBottom: "35px",
-            }}
-          >
-            <h2
-              style={{
-                color: "#f43f5e",
-                marginBottom: "18px",
-              }}
-            >
-              Match Events
-            </h2>
+      {/* STYLES */}
+      <style jsx>{`
+        @keyframes pulse {
+          0% {
+            transform: scale(1);
+          }
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection:
-                  "column",
-                gap: "12px",
-              }}
-            >
-              {match.events.map(
-                (
-                  event,
-                  index
-                ) => {
-                  let icon =
-                    "⚽";
+          50% {
+            transform: scale(1.05);
+          }
 
-                  if (
-                    event.type ===
-                    "Card"
-                  ) {
-                    if (
-                      event.detail ===
-                      "Yellow Card"
-                    ) {
-                      icon =
-                        "🟨";
-                    }
+          100% {
+            transform: scale(1);
+          }
+        }
 
-                    if (
-                      event.detail ===
-                      "Red Card"
-                    ) {
-                      icon =
-                        "🟥";
-                    }
-                  }
+        .player-card:hover {
+          transform: translateY(-5px)
+            scale(1.02);
 
-                  if (
-                    event.type ===
-                    "subst"
-                  ) {
-                    icon =
-                      "🔄";
-                  }
+          transition: 0.3s;
 
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        background:
-                          "#1f2937",
-                        borderRadius:
-                          "16px",
-                        padding:
-                          "16px",
-                        display:
-                          "flex",
-                        gap: "14px",
-                        alignItems:
-                          "center",
-                      }}
-                    >
-                      <div
-                        style={{
-                          color:
-                            "#22c55e",
-                          fontWeight:
-                            "bold",
-                          minWidth:
-                            "45px",
-                        }}
-                      >
-                        {
-                          event.time
-                            .elapsed
-                        }
-                        '
-                      </div>
+          box-shadow:
+            0 0 20px
+              rgba(
+                250,
+                204,
+                21,
+                0.45
+              );
+        }
 
-                      <div
-                        style={{
-                          flex: 1,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap: "8px",
-                            flexWrap:
-                              "wrap",
-                          }}
-                        >
-                          <span>
-                            {icon}
-                          </span>
+        .pitch-player:hover {
+          transform: scale(1.08);
 
-                          <strong>
-                            {
-                              event
-                                .player
-                                .name
-                            }
-                          </strong>
-                        </div>
+          transition: 0.3s;
 
-                        <p
-                          style={{
-                            color:
-                              "#9ca3af",
-                            marginTop:
-                              "5px",
-                            marginBottom:
-                              0,
-                            fontSize:
-                              "13px",
-                          }}
-                        >
-                          {
-                            event.detail
-                          }
-                        </p>
+          box-shadow:
+            0 0 25px
+              rgba(
+                250,
+                204,
+                21,
+                0.75
+              );
+        }
 
-                        {/* SUBSTITUTION */}
-                        {event.type ===
-                          "subst" &&
-                          event
-                            .assist &&
-                          event
-                            .assist
-                            .name && (
-                            <p
-                              style={{
-                                color:
-                                  "#facc15",
-                                marginTop:
-                                  "5px",
-                                marginBottom:
-                                  0,
-                                fontSize:
-                                  "13px",
-                                fontWeight:
-                                  "bold",
-                              }}
-                            >
-                              ⬅️ Out:{" "}
-                              {
-                                event
-                                  .assist
-                                  .name
-                              }
-                            </p>
-                          )}
+        .event-card:hover {
+          transform: translateY(-4px);
 
-                        {/* ASSIST */}
-                        {event.type !==
-                          "subst" &&
-                          event
-                            .assist &&
-                          event
-                            .assist
-                            .name && (
-                            <p
-                              style={{
-                                color:
-                                  "#22c55e",
-                                marginTop:
-                                  "5px",
-                                marginBottom:
-                                  0,
-                                fontSize:
-                                  "13px",
-                                fontWeight:
-                                  "bold",
-                              }}
-                            >
-                              🅰️ Assist:{" "}
-                              {
-                                event
-                                  .assist
-                                  .name
-                              }
-                            </p>
-                          )}
-                      </div>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        )}
+          transition: 0.3s;
 
-      {/* TACTICAL LINEUPS */}
-      {homeLineup &&
-        awayLineup && (
-          <div>
-            <h2
-              style={{
-                color: "#22c55e",
-                fontSize: "28px",
-                marginBottom:
-                  "18px",
-              }}
-            >
-              Tactical Lineups
-            </h2>
-
-            <div
-              style={{
-                background:
-                  "linear-gradient(to bottom, #166534, #14532d)",
-                borderRadius:
-                  "20px",
-                padding:
-                  "24px 8px",
-                position:
-                  "relative",
-                overflow:
-                  "hidden",
-                border:
-                  "3px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              {/* OUTER BORDER */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  inset: "10px",
-                  border:
-                    "2px solid rgba(255,255,255,0.35)",
-                  borderRadius:
-                    "8px",
-                }}
-              />
-
-              {/* MIDFIELD LINE */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  top: "50%",
-                  left: "10px",
-                  right: "10px",
-                  height: "2px",
-                  background:
-                    "rgba(255,255,255,0.4)",
-                }}
-              />
-
-              {/* CENTER CIRCLE */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform:
-                    "translate(-50%, -50%)",
-                  width: "70px",
-                  height: "70px",
-                  borderRadius:
-                    "50%",
-                  border:
-                    "2px solid rgba(255,255,255,0.4)",
-                }}
-              />
-
-              {/* TOP PENALTY BOX */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  top: "10px",
-                  left: "50%",
-                  transform:
-                    "translateX(-50%)",
-                  width: "160px",
-                  height: "75px",
-                  border:
-                    "2px solid rgba(255,255,255,0.35)",
-                  borderTop:
-                    "none",
-                }}
-              />
-
-              {/* TOP GOAL AREA */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  top: "10px",
-                  left: "50%",
-                  transform:
-                    "translateX(-50%)",
-                  width: "80px",
-                  height: "35px",
-                  border:
-                    "2px solid rgba(255,255,255,0.35)",
-                  borderTop:
-                    "none",
-                }}
-              />
-
-              {/* BOTTOM PENALTY BOX */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  bottom: "10px",
-                  left: "50%",
-                  transform:
-                    "translateX(-50%)",
-                  width: "160px",
-                  height: "75px",
-                  border:
-                    "2px solid rgba(255,255,255,0.35)",
-                  borderBottom:
-                    "none",
-                }}
-              />
-
-              {/* BOTTOM GOAL AREA */}
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  bottom: "10px",
-                  left: "50%",
-                  transform:
-                    "translateX(-50%)",
-                  width: "80px",
-                  height: "35px",
-                  border:
-                    "2px solid rgba(255,255,255,0.35)",
-                  borderBottom:
-                    "none",
-                }}
-              />
-
-              {/* HOME */}
-              <div
-                style={{
-                  marginBottom:
-                    "30px",
-                  marginTop: "15px",
-                  position:
-                    "relative",
-                  zIndex: 2,
-                }}
-              >
-                {renderRows(
-                  homeRows
-                )}
-              </div>
-
-              {/* AWAY */}
-              <div
-                style={{
-                  position:
-                    "relative",
-                  zIndex: 2,
-                }}
-              >
-                {renderRows(
-                  awayRows
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+          box-shadow:
+            0 0 22px
+              rgba(
+                250,
+                204,
+                21,
+                0.4
+              );
+        }
+      `}</style>
     </div>
   );
 }
