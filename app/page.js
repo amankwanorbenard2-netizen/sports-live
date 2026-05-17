@@ -10,23 +10,33 @@ export default function HomePage() {
       color: "#22c55e",
       emoji: "🔴",
     },
+
     {
       title: "Fixtures",
       link: "/fixtures",
       color: "#3b82f6",
       emoji: "📅",
     },
+
     {
       title: "Finished Matches",
       link: "/finished",
       color: "#facc15",
       emoji: "✅",
     },
+
     {
       title: "League Tables",
       link: "/standings",
       color: "#a855f7",
       emoji: "🏆",
+    },
+
+    {
+      title: "Football News",
+      link: "/news",
+      color: "#f43f5e",
+      emoji: "📰",
     },
   ];
 
@@ -44,7 +54,7 @@ export default function HomePage() {
       <div
         style={{
           textAlign: "center",
-          padding: "80px 20px 60px",
+          padding: "80px 20px 50px",
         }}
       >
         <h1
@@ -90,7 +100,6 @@ export default function HomePage() {
             href={card.link}
             style={{
               textDecoration: "none",
-              display: "block",
             }}
           >
             <div
@@ -103,9 +112,6 @@ export default function HomePage() {
                 transition: "0.3s",
                 textAlign: "center",
                 minHeight: "230px",
-
-                position: "relative",
-                zIndex: 999,
 
                 display: "flex",
                 flexDirection: "column",
@@ -148,18 +154,6 @@ export default function HomePage() {
             </div>
           </Link>
         ))}
-      </div>
-
-      {/* FOOTER */}
-      <div
-        style={{
-          textAlign: "center",
-          padding: "40px",
-          color: "#94a3b8",
-          fontSize: "18px",
-        }}
-      >
-        Powered by Sports Live ⚽
       </div>
     </div>
   );
