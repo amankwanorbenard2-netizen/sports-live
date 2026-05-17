@@ -7,8 +7,7 @@ export default function MatchDetails() {
   const params = useParams();
 
   const [match, setMatch] = useState(null);
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchMatch() {
@@ -44,10 +43,9 @@ export default function MatchDetails() {
           color: "white",
           minHeight: "100vh",
           display: "flex",
-          justifyContent:
-            "center",
+          justifyContent: "center",
           alignItems: "center",
-          fontSize: "40px",
+          fontSize: "32px",
         }}
       >
         Loading Match...
@@ -55,10 +53,7 @@ export default function MatchDetails() {
     );
   }
 
-  if (
-    !match ||
-    !match.teams
-  ) {
+  if (!match || !match.teams) {
     return (
       <div
         style={{
@@ -66,10 +61,9 @@ export default function MatchDetails() {
           color: "white",
           minHeight: "100vh",
           display: "flex",
-          justifyContent:
-            "center",
+          justifyContent: "center",
           alignItems: "center",
-          fontSize: "40px",
+          fontSize: "32px",
         }}
       >
         Match Not Found
@@ -77,12 +71,8 @@ export default function MatchDetails() {
     );
   }
 
-  function groupPlayers(
-    startXI,
-    formation
-  ) {
-    if (!formation)
-      return [startXI];
+  function groupPlayers(startXI, formation) {
+    if (!formation) return [startXI];
 
     const parts = formation
       .split("-")
@@ -128,26 +118,20 @@ export default function MatchDetails() {
       ).reverse()
     : [];
 
-  function renderPlayer(
-    playerData
-  ) {
-    const rating =
-      playerData.player.rating;
+  function renderPlayer(playerData) {
+    const rating = parseFloat(
+      playerData.player.rating || 0
+    );
 
-    let ratingColor =
-      "#9ca3af";
+    let ratingColor = "#9ca3af";
 
     if (rating >= 8) {
       ratingColor = "#22c55e";
-    } else if (
-      rating >= 7
-    ) {
+    } else if (rating >= 7) {
       ratingColor = "#facc15";
-    } else if (
-      rating >= 6
-    ) {
+    } else if (rating >= 6) {
       ratingColor = "#fb923c";
-    } else {
+    } else if (rating > 0) {
       ratingColor = "#ef4444";
     }
 
@@ -155,12 +139,14 @@ export default function MatchDetails() {
       <div
         style={{
           textAlign: "center",
+          width: "62px",
         }}
       >
+        {/* PLAYER */}
         <div
           style={{
-            width: "58px",
-            height: "58px",
+            width: "44px",
+            height: "44px",
             borderRadius: "50%",
             background: "#facc15",
             color: "#111827",
@@ -169,11 +155,13 @@ export default function MatchDetails() {
               "center",
             alignItems: "center",
             fontWeight: "bold",
-            fontSize: "15px",
+            fontSize: "13px",
             margin: "auto",
             border:
               "3px solid white",
             position: "relative",
+            boxShadow:
+              "0 0 10px rgba(0,0,0,0.4)",
           }}
         >
           {
@@ -182,44 +170,47 @@ export default function MatchDetails() {
           }
 
           {/* RATING */}
-          {rating && (
-            <div
-              style={{
-                position:
-                  "absolute",
-                bottom: "-8px",
-                right: "-8px",
-                background:
-                  ratingColor,
-                color: "white",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  "bold",
-                borderRadius:
-                  "999px",
-                padding:
-                  "4px 6px",
-                border:
-                  "2px solid #111827",
-                minWidth:
-                  "24px",
-                textAlign:
-                  "center",
-              }}
-            >
-              {rating}
-            </div>
-          )}
+          <div
+            style={{
+              position:
+                "absolute",
+              bottom: "-6px",
+              right: "-6px",
+              background:
+                rating > 0
+                  ? ratingColor
+                  : "#6b7280",
+              color: "white",
+              fontSize: "9px",
+              fontWeight:
+                "bold",
+              borderRadius:
+                "999px",
+              padding:
+                "2px 5px",
+              border:
+                "2px solid #111827",
+              minWidth: "22px",
+              textAlign:
+                "center",
+            }}
+          >
+            {rating > 0
+              ? rating.toFixed(1)
+              : "-"}
+          </div>
         </div>
 
+        {/* NAME */}
         <p
           style={{
-            marginTop: "10px",
-            fontSize: "12px",
+            marginTop: "8px",
+            fontSize: "10px",
             fontWeight: "bold",
-            maxWidth: "75px",
             color: "white",
+            lineHeight: "13px",
+            wordBreak:
+              "break-word",
           }}
         >
           {
@@ -241,9 +232,10 @@ export default function MatchDetails() {
             justifyContent:
               "space-evenly",
             alignItems: "center",
-            marginBottom: "40px",
-            flexWrap: "wrap",
-            gap: "10px",
+            marginBottom: "24px",
+            flexWrap: "nowrap",
+            gap: "4px",
+            width: "100%",
           }}
         >
           {row.map(
@@ -269,17 +261,17 @@ export default function MatchDetails() {
         background: "#111827",
         color: "white",
         minHeight: "100vh",
-        padding: "20px",
-        paddingBottom: "140px",
+        padding: "14px",
+        paddingBottom: "120px",
       }}
     >
       {/* SCORE */}
       <div
         style={{
           background: "#1f2937",
-          borderRadius: "25px",
-          padding: "25px",
-          marginBottom: "35px",
+          borderRadius: "20px",
+          padding: "20px",
+          marginBottom: "30px",
         }}
       >
         <div
@@ -289,16 +281,21 @@ export default function MatchDetails() {
               "space-between",
             alignItems: "center",
             textAlign: "center",
-            gap: "20px",
-            flexWrap: "wrap",
+            gap: "12px",
           }}
         >
           <div style={{ flex: 1 }}>
             <img
               src={match.teams.home.logo}
-              width="70"
+              width="55"
+              alt=""
             />
-            <h2>
+
+            <h2
+              style={{
+                fontSize: "18px",
+              }}
+            >
               {match.teams.home.name}
             </h2>
           </div>
@@ -307,7 +304,7 @@ export default function MatchDetails() {
             <h1
               style={{
                 color: "#22c55e",
-                fontSize: "52px",
+                fontSize: "38px",
                 margin: 0,
               }}
             >
@@ -318,6 +315,7 @@ export default function MatchDetails() {
             <p
               style={{
                 color: "#9ca3af",
+                fontSize: "14px",
               }}
             >
               {
@@ -330,9 +328,15 @@ export default function MatchDetails() {
           <div style={{ flex: 1 }}>
             <img
               src={match.teams.away.logo}
-              width="70"
+              width="55"
+              alt=""
             />
-            <h2>
+
+            <h2
+              style={{
+                fontSize: "18px",
+              }}
+            >
               {match.teams.away.name}
             </h2>
           </div>
@@ -343,16 +347,15 @@ export default function MatchDetails() {
       <div
         style={{
           background: "#1f2937",
-          borderRadius: "25px",
-          padding: "25px",
-          marginBottom: "40px",
+          borderRadius: "20px",
+          padding: "20px",
+          marginBottom: "30px",
         }}
       >
         <h2
           style={{
             color: "#facc15",
-            fontSize: "34px",
-            marginBottom: "20px",
+            marginBottom: "18px",
           }}
         >
           Match Information
@@ -385,14 +388,13 @@ export default function MatchDetails() {
       {/* STATISTICS */}
       <div
         style={{
-          marginBottom: "40px",
+          marginBottom: "35px",
         }}
       >
         <h2
           style={{
             color: "#3b82f6",
-            fontSize: "38px",
-            marginBottom: "25px",
+            marginBottom: "18px",
           }}
         >
           Match Statistics
@@ -405,8 +407,8 @@ export default function MatchDetails() {
             style={{
               display: "grid",
               gridTemplateColumns:
-                "repeat(auto-fit,minmax(280px,1fr))",
-              gap: "20px",
+                "repeat(auto-fit,minmax(160px,1fr))",
+              gap: "12px",
             }}
           >
             {match.statistics[0].statistics.map(
@@ -420,42 +422,76 @@ export default function MatchDetails() {
                     background:
                       "#1f2937",
                     padding:
-                      "20px",
+                      "16px",
                     borderRadius:
-                      "20px",
+                      "16px",
+                    textAlign:
+                      "center",
                   }}
                 >
                   <h3
                     style={{
                       color:
                         "#facc15",
+                      fontSize:
+                        "14px",
+                      marginBottom:
+                        "12px",
                     }}
                   >
                     {stat.type}
                   </h3>
 
-                  <p>
-                    {
-                      match.teams.home
-                        .name
-                    }
-                    :{" "}
-                    {stat.value ||
-                      0}
-                  </p>
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color:
+                          "#22c55e",
+                        fontWeight:
+                          "bold",
+                      }}
+                    >
+                      {stat.value ||
+                        0}
+                    </span>
 
-                  <p>
-                    {
-                      match.teams.away
-                        .name
-                    }
-                    :{" "}
-                    {match
-                      .statistics[1]
-                      ?.statistics[
-                      index
-                    ]?.value || 0}
-                  </p>
+                    <span
+                      style={{
+                        color:
+                          "#9ca3af",
+                        fontSize:
+                          "12px",
+                      }}
+                    >
+                      vs
+                    </span>
+
+                    <span
+                      style={{
+                        color:
+                          "#ef4444",
+                        fontWeight:
+                          "bold",
+                      }}
+                    >
+                      {match
+                        .statistics[1]
+                        ?.statistics[
+                        index
+                      ]?.value ||
+                        0}
+                    </span>
+                  </div>
                 </div>
               )
             )}
@@ -465,12 +501,11 @@ export default function MatchDetails() {
             style={{
               background:
                 "#1f2937",
-              padding: "30px",
+              padding: "25px",
               borderRadius:
-                "20px",
+                "18px",
               textAlign: "center",
               color: "#9ca3af",
-              fontSize: "18px",
             }}
           >
             Statistics not available
@@ -485,14 +520,13 @@ export default function MatchDetails() {
           0 && (
           <div
             style={{
-              marginBottom: "45px",
+              marginBottom: "35px",
             }}
           >
             <h2
               style={{
                 color: "#f43f5e",
-                fontSize: "38px",
-                marginBottom: "25px",
+                marginBottom: "18px",
               }}
             >
               Match Events
@@ -503,7 +537,7 @@ export default function MatchDetails() {
                 display: "flex",
                 flexDirection:
                   "column",
-                gap: "18px",
+                gap: "12px",
               }}
             >
               {match.events.map(
@@ -550,18 +584,14 @@ export default function MatchDetails() {
                         background:
                           "#1f2937",
                         borderRadius:
-                          "18px",
+                          "16px",
                         padding:
-                          "18px",
+                          "16px",
                         display:
                           "flex",
-                        justifyContent:
-                          "space-between",
+                        gap: "14px",
                         alignItems:
                           "center",
-                        gap: "15px",
-                        flexWrap:
-                          "wrap",
                       }}
                     >
                       <div
@@ -570,10 +600,8 @@ export default function MatchDetails() {
                             "#22c55e",
                           fontWeight:
                             "bold",
-                          fontSize:
-                            "22px",
                           minWidth:
-                            "60px",
+                            "45px",
                         }}
                       >
                         {
@@ -594,17 +622,12 @@ export default function MatchDetails() {
                               "flex",
                             alignItems:
                               "center",
-                            gap: "10px",
+                            gap: "8px",
                             flexWrap:
                               "wrap",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize:
-                                "28px",
-                            }}
-                          >
+                          <span>
                             {icon}
                           </span>
 
@@ -615,100 +638,86 @@ export default function MatchDetails() {
                                 .name
                             }
                           </strong>
-
-                          <span
-                            style={{
-                              color:
-                                "#9ca3af",
-                            }}
-                          >
-                            (
-                            {
-                              event.team
-                                .name
-                            }
-                            )
-                          </span>
                         </div>
 
-                        <div
+                        <p
                           style={{
+                            color:
+                              "#9ca3af",
                             marginTop:
-                              "6px",
+                              "5px",
+                            marginBottom:
+                              0,
+                            fontSize:
+                              "13px",
                           }}
                         >
-                          <p
-                            style={{
-                              color:
-                                "#9ca3af",
-                              margin: 0,
-                            }}
-                          >
-                            {
-                              event.detail
-                            }
-                          </p>
+                          {
+                            event.detail
+                          }
+                        </p>
 
-                          {/* SUBSTITUTION */}
-                          {event.type ===
-                            "subst" &&
-                            event
-                              .assist &&
-                            event
-                              .assist
-                              .name && (
-                              <p
-                                style={{
-                                  color:
-                                    "#facc15",
-                                  marginTop:
-                                    "5px",
-                                  fontSize:
-                                    "14px",
-                                  fontWeight:
-                                    "bold",
-                                }}
-                              >
-                                ⬅️ Out:
-                                {" "}
-                                {
-                                  event
-                                    .assist
-                                    .name
-                                }
-                              </p>
-                            )}
+                        {/* SUBSTITUTION */}
+                        {event.type ===
+                          "subst" &&
+                          event
+                            .assist &&
+                          event
+                            .assist
+                            .name && (
+                            <p
+                              style={{
+                                color:
+                                  "#facc15",
+                                marginTop:
+                                  "5px",
+                                marginBottom:
+                                  0,
+                                fontSize:
+                                  "13px",
+                                fontWeight:
+                                  "bold",
+                              }}
+                            >
+                              ⬅️ Out:{" "}
+                              {
+                                event
+                                  .assist
+                                  .name
+                              }
+                            </p>
+                          )}
 
-                          {/* ASSIST */}
-                          {event.type !==
-                            "subst" &&
-                            event
-                              .assist &&
-                            event
-                              .assist
-                              .name && (
-                              <p
-                                style={{
-                                  color:
-                                    "#22c55e",
-                                  marginTop:
-                                    "5px",
-                                  fontSize:
-                                    "14px",
-                                  fontWeight:
-                                    "bold",
-                                }}
-                              >
-                                🅰️ Assist:
-                                {" "}
-                                {
-                                  event
-                                    .assist
-                                    .name
-                                }
-                              </p>
-                            )}
-                        </div>
+                        {/* ASSIST */}
+                        {event.type !==
+                          "subst" &&
+                          event
+                            .assist &&
+                          event
+                            .assist
+                            .name && (
+                            <p
+                              style={{
+                                color:
+                                  "#22c55e",
+                                marginTop:
+                                  "5px",
+                                marginBottom:
+                                  0,
+                                fontSize:
+                                  "13px",
+                                fontWeight:
+                                  "bold",
+                              }}
+                            >
+                              🅰️ Assist:{" "}
+                              {
+                                event
+                                  .assist
+                                  .name
+                              }
+                            </p>
+                          )}
                       </div>
                     </div>
                   );
@@ -725,8 +734,9 @@ export default function MatchDetails() {
             <h2
               style={{
                 color: "#22c55e",
-                fontSize: "38px",
-                marginBottom: "25px",
+                fontSize: "28px",
+                marginBottom:
+                  "18px",
               }}
             >
               Tactical Lineups
@@ -737,9 +747,9 @@ export default function MatchDetails() {
                 background:
                   "linear-gradient(to bottom, #166534, #14532d)",
                 borderRadius:
-                  "25px",
+                  "20px",
                 padding:
-                  "40px 15px",
+                  "24px 8px",
                 position:
                   "relative",
                 overflow:
@@ -753,11 +763,11 @@ export default function MatchDetails() {
                 style={{
                   position:
                     "absolute",
-                  inset: "15px",
+                  inset: "10px",
                   border:
                     "2px solid rgba(255,255,255,0.35)",
                   borderRadius:
-                    "10px",
+                    "8px",
                 }}
               />
 
@@ -767,8 +777,8 @@ export default function MatchDetails() {
                   position:
                     "absolute",
                   top: "50%",
-                  left: "15px",
-                  right: "15px",
+                  left: "10px",
+                  right: "10px",
                   height: "2px",
                   background:
                     "rgba(255,255,255,0.4)",
@@ -784,9 +794,8 @@ export default function MatchDetails() {
                   left: "50%",
                   transform:
                     "translate(-50%, -50%)",
-                  width: "100px",
-                  height:
-                    "100px",
+                  width: "70px",
+                  height: "70px",
                   borderRadius:
                     "50%",
                   border:
@@ -799,13 +808,12 @@ export default function MatchDetails() {
                 style={{
                   position:
                     "absolute",
-                  top: "15px",
+                  top: "10px",
                   left: "50%",
                   transform:
                     "translateX(-50%)",
-                  width: "220px",
-                  height:
-                    "110px",
+                  width: "160px",
+                  height: "75px",
                   border:
                     "2px solid rgba(255,255,255,0.35)",
                   borderTop:
@@ -818,12 +826,12 @@ export default function MatchDetails() {
                 style={{
                   position:
                     "absolute",
-                  top: "15px",
+                  top: "10px",
                   left: "50%",
                   transform:
                     "translateX(-50%)",
-                  width: "120px",
-                  height: "55px",
+                  width: "80px",
+                  height: "35px",
                   border:
                     "2px solid rgba(255,255,255,0.35)",
                   borderTop:
@@ -836,13 +844,12 @@ export default function MatchDetails() {
                 style={{
                   position:
                     "absolute",
-                  bottom: "15px",
+                  bottom: "10px",
                   left: "50%",
                   transform:
                     "translateX(-50%)",
-                  width: "220px",
-                  height:
-                    "110px",
+                  width: "160px",
+                  height: "75px",
                   border:
                     "2px solid rgba(255,255,255,0.35)",
                   borderBottom:
@@ -855,12 +862,12 @@ export default function MatchDetails() {
                 style={{
                   position:
                     "absolute",
-                  bottom: "15px",
+                  bottom: "10px",
                   left: "50%",
                   transform:
                     "translateX(-50%)",
-                  width: "120px",
-                  height: "55px",
+                  width: "80px",
+                  height: "35px",
                   border:
                     "2px solid rgba(255,255,255,0.35)",
                   borderBottom:
@@ -868,11 +875,12 @@ export default function MatchDetails() {
                 }}
               />
 
-              {/* HOME TEAM */}
+              {/* HOME */}
               <div
                 style={{
                   marginBottom:
-                    "70px",
+                    "30px",
+                  marginTop: "15px",
                   position:
                     "relative",
                   zIndex: 2,
@@ -883,7 +891,7 @@ export default function MatchDetails() {
                 )}
               </div>
 
-              {/* AWAY TEAM */}
+              {/* AWAY */}
               <div
                 style={{
                   position:
