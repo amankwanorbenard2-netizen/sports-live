@@ -14,9 +14,56 @@ export default function FinishedPage() {
       .then((res) => res.json())
       .then((data) => {
 
-        setMatches(
-          data.events || []
+       const sortedMatches =
+  (data.events || []).sort(
+    (a, b) => {
+
+      const leagueOrder = [
+
+        "Premier League",
+
+        "UEFA Champions League",
+
+        "La Liga",
+
+        "Serie A",
+
+        "Bundesliga",
+
+        "Ligue 1",
+
+      ];
+
+      const aIndex =
+        leagueOrder.indexOf(
+          a.league.name
         );
+
+      const bIndex =
+        leagueOrder.indexOf(
+          b.league.name
+        );
+
+      const finalA =
+        aIndex === -1
+          ? 999
+          : aIndex;
+
+      const finalB =
+        bIndex === -1
+          ? 999
+          : bIndex;
+
+      return (
+        finalA - finalB
+      );
+
+    }
+  );
+
+setMatches(
+  sortedMatches
+);
 
       });
 

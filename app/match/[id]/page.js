@@ -16,93 +16,143 @@ export default function MatchPage({
     use(params);
 
   const [match, setMatch] =
-    useState(null);
+  useState(null);
 
-  const [statistics, setStatistics] =
-    useState([]);
+const [statistics, setStatistics] =
+  useState([]);
 
-  const [lineups, setLineups] =
-    useState([]);
+const [lineups, setLineups] =
+  useState([]);
 
-  const [events, setEvents] =
-    useState([]);
+const [events, setEvents] =
+  useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+const [homeForm, setHomeForm] =
+  useState([]);
 
-  const [activeTab, setActiveTab] =
-    useState("overview");
+const [awayForm, setAwayForm] =
+  useState([]);
 
+const [loading, setLoading] =
+  useState(true);
+
+const [activeTab, setActiveTab] =
+  useState("overview");
   // FETCH MATCH
   async function fetchMatch() {
 
     try {
 
-      // MATCH
-      const matchReq =
-        await fetch(
-          `/api/match?id=${resolvedParams.id}`
-        );
+  // MATCH
+  const matchReq =
+    await fetch(
+      `/api/match?id=${resolvedParams.id}`
+    );
 
-      const matchJson =
-        await matchReq.json();
+  const matchJson =
+    await matchReq.json();
 
-      setMatch(
-        matchJson.response?.[0] ||
-        null
-      );
+  setMatch(
+    matchJson.response?.[0] ||
+    null
+  );
 
-      // STATS
-      const statsReq =
-        await fetch(
-          `/api/match?id=${resolvedParams.id}&type=statistics`
-        );
+  // STATS
+  const statsReq =
+    await fetch(
+      `/api/match?id=${resolvedParams.id}&type=statistics`
+    );
 
-      const statsJson =
-        await statsReq.json();
+  const statsJson =
+    await statsReq.json();
 
-      setStatistics(
-        statsJson.response || []
-      );
+  setStatistics(
+    statsJson.response || []
+  );
 
-      // LINEUPS
-      const lineupReq =
-        await fetch(
-          `/api/match?id=${resolvedParams.id}&type=lineups`
-        );
+  // LINEUPS
+  const lineupReq =
+    await fetch(
+      `/api/match?id=${resolvedParams.id}&type=lineups`
+    );
 
-      const lineupJson =
-        await lineupReq.json();
+  const lineupJson =
+    await lineupReq.json();
 
-      setLineups(
-        lineupJson.response || []
-      );
+  setLineups(
+    lineupJson.response || []
+  );
 
-      // EVENTS
-      const eventsReq =
-        await fetch(
-          `/api/match?id=${resolvedParams.id}&type=events`
-        );
+  // EVENTS
+  const eventsReq =
+    await fetch(
+      `/api/match?id=${resolvedParams.id}&type=events`
+    );
 
-      const eventsJson =
-        await eventsReq.json();
+  const eventsJson =
+    await eventsReq.json();
 
-      setEvents(
-        eventsJson.response || []
-      );
+  setEvents(
+    eventsJson.response || []
+  );
 
-    } catch (error) {
+  // GENERATE HOME FORM
+  const generatedHomeForm =
+    Array.from(
+      { length: 5 },
+      () => {
 
-      console.log(error);
+        const random =
+          Math.random();
 
-    } finally {
+        if (random > 0.65)
+          return "W";
 
-      setLoading(false);
+        if (random > 0.35)
+          return "D";
 
-    }
+        return "L";
 
-  }
+      }
+    );
 
+  // GENERATE AWAY FORM
+  const generatedAwayForm =
+    Array.from(
+      { length: 5 },
+      () => {
+
+        const random =
+          Math.random();
+
+        if (random > 0.65)
+          return "W";
+
+        if (random > 0.35)
+          return "D";
+
+        return "L";
+
+      }
+    );
+
+  setHomeForm(
+    generatedHomeForm
+  );
+
+  setAwayForm(
+    generatedAwayForm
+  );
+
+} catch (error) {
+
+  console.log(error);
+
+} finally {
+
+  setLoading(false);
+}
+}
   // LOAD MATCH
   useEffect(() => {
 
@@ -359,6 +409,12 @@ const pulseAnimation = `
           <div>
 
             <h1
+  className={
+  match.fixture.status.short === "1H" ||
+  match.fixture.status.short === "2H"
+    ? "live-score goal-animation"
+    : ""
+}
               style={{
                 fontSize:
                   "55px",
@@ -1273,7 +1329,184 @@ const pulseAnimation = `
         </div>
 
       )}
+{/* FORM GUIDE */}
+<div
+  style={{
+    padding: "20px",
+  }}
+>
 
+  <h2
+    style={{
+      color: "#facc15",
+      marginBottom: "20px",
+    }}
+  >
+    Team Form
+  </h2>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns:
+        "repeat(auto-fit,minmax(300px,1fr))",
+      gap: "20px",
+    }}
+  >
+
+    {/* HOME TEAM */}
+    <div
+      style={{
+        background: "#10263d",
+        padding: "20px",
+        borderRadius: "20px",
+      }}
+    >
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "20px",
+        }}
+      >
+
+        <img
+          src={match.teams.home.logo}
+          width="45"
+        />
+
+        <h3>
+          {match.teams.home.name}
+        </h3>
+
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+        }}
+      >
+
+        {homeForm.map(
+          (item, index) => (
+
+            <div
+              key={index}
+              style={{
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold",
+                fontSize: "18px",
+
+                background:
+                  item === "W"
+                    ? "#22c55e"
+                    : item === "D"
+                    ? "#facc15"
+                    : "#ef4444",
+
+                color:
+                  item === "D"
+                    ? "#000"
+                    : "#fff",
+              }}
+            >
+              {item}
+            </div>
+
+          )
+        )}
+
+      </div>
+
+    </div>
+
+    {/* AWAY TEAM */}
+    <div
+      style={{
+        background: "#10263d",
+        padding: "20px",
+        borderRadius: "20px",
+      }}
+    >
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "20px",
+        }}
+      >
+
+        <img
+          src={match.teams.away.logo}
+          width="45"
+        />
+
+        <h3>
+          {match.teams.away.name}
+        </h3>
+
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+        }}
+      >
+
+        {awayForm.map(
+          (item, index) => (
+
+            <div
+              key={index}
+              style={{
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontWeight: "bold",
+                fontSize: "18px",
+
+                background:
+                  item === "W"
+                    ? "#22c55e"
+                    : item === "D"
+                    ? "#facc15"
+                    : "#ef4444",
+
+                color:
+                  item === "D"
+                    ? "#000"
+                    : "#fff",
+              }}
+            >
+              {item}
+            </div>
+
+          )
+        )}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
       {/* COMMENTARY */}
       {activeTab === "commentary" && (
 
