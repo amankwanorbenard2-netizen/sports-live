@@ -1,6 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function MatchCard({ match }) {
+
+  const router = useRouter();
 
   const homeTeam =
     match?.teams?.home?.name;
@@ -29,11 +33,17 @@ export default function MatchCard({ match }) {
   return (
 
     <div
+      onClick={() =>
+        router.push(
+          `/match/${match.fixture.id}`
+        )
+      }
       style={{
         background: "#1f2937",
         padding: "20px",
         borderRadius: "20px",
         marginBottom: "20px",
+        cursor: "pointer",
       }}
     >
 
