@@ -48,14 +48,10 @@ export default function HomePage() {
     <div
       style={{
         minHeight: "100vh",
-
         background:
           "linear-gradient(to bottom,#071b2d,#0f172a)",
-
         color: "white",
-
-        paddingBottom:
-          "140px",
+        paddingBottom: "140px",
       }}
     >
 
@@ -63,11 +59,7 @@ export default function HomePage() {
       <div
         style={{
           textAlign: "center",
-
-          padding:
-            window.innerWidth < 600
-              ? "60px 20px 40px"
-              : "90px 20px 60px",
+          padding: "90px 20px 60px",
         }}
       >
 
@@ -131,24 +123,11 @@ export default function HomePage() {
         {/* TITLE */}
         <h1
           style={{
-            fontSize:
-              window.innerWidth < 600
-                ? "42px"
-                : "72px",
-
-            fontWeight:
-              "bold",
-
-            color:
-              "#84cc16",
-
-            marginBottom:
-              "20px",
-
-            lineHeight:
-              window.innerWidth < 600
-                ? "52px"
-                : "82px",
+            fontSize: "72px",
+            fontWeight: "bold",
+            color: "#84cc16",
+            marginBottom: "20px",
+            lineHeight: "82px",
           }}
         >
           Football Live
@@ -159,27 +138,12 @@ export default function HomePage() {
         {/* SUBTITLE */}
         <p
           style={{
-            fontSize:
-              window.innerWidth < 600
-                ? "17px"
-                : "24px",
-
-            color:
-              "#cbd5e1",
-
-            maxWidth:
-              "850px",
-
-            margin:
-              "auto",
-
-            lineHeight:
-              window.innerWidth < 600
-                ? "30px"
-                : "42px",
-
-            padding:
-              "0 10px",
+            fontSize: "24px",
+            color: "#cbd5e1",
+            maxWidth: "850px",
+            margin: "auto",
+            lineHeight: "42px",
+            padding: "0 10px",
           }}
         >
           Follow live football matches,
@@ -198,15 +162,9 @@ export default function HomePage() {
           gridTemplateColumns:
             "repeat(auto-fit,minmax(260px,1fr))",
 
-          gap:
-            window.innerWidth < 600
-              ? "18px"
-              : "25px",
+          gap: "25px",
 
-          padding:
-            window.innerWidth < 600
-              ? "18px"
-              : "30px",
+          padding: "30px",
         }}
       >
 
@@ -231,9 +189,7 @@ export default function HomePage() {
                     "25px",
 
                   padding:
-                    window.innerWidth < 600
-                      ? "30px 20px"
-                      : "40px",
+                    "40px",
 
                   border:
                     `2px solid ${card.color}`,
@@ -248,9 +204,7 @@ export default function HomePage() {
                     "center",
 
                   minHeight:
-                    window.innerWidth < 600
-                      ? "190px"
-                      : "230px",
+                    "230px",
 
                   display:
                     "flex",
@@ -291,11 +245,7 @@ export default function HomePage() {
                 {/* EMOJI */}
                 <div
                   style={{
-                    fontSize:
-                      window.innerWidth < 600
-                        ? "52px"
-                        : "65px",
-
+                    fontSize: "65px",
                     marginBottom:
                       "18px",
                   }}
@@ -306,10 +256,7 @@ export default function HomePage() {
                 {/* TITLE */}
                 <h2
                   style={{
-                    fontSize:
-                      window.innerWidth < 600
-                        ? "26px"
-                        : "34px",
+                    fontSize: "34px",
 
                     fontWeight:
                       "bold",
@@ -338,10 +285,7 @@ export default function HomePage() {
           marginTop: "30px",
           textAlign: "center",
           color: "#94a3b8",
-          fontSize:
-            window.innerWidth < 600
-              ? "13px"
-              : "15px",
+          fontSize: "15px",
         }}
       >
         Real-time football scores,
