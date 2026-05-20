@@ -51,20 +51,14 @@ export default function FinishedPage() {
 
         <img
           src="https://cdn-icons-png.flaticon.com/512/53/53283.png"
-          width={
-            window.innerWidth < 600
-              ? "32"
-              : "40"
-          }
+          width="40"
+          alt=""
         />
 
         <h1
           style={{
             color: "#84cc16",
-            fontSize:
-              window.innerWidth < 600
-                ? "28px"
-                : "42px",
+            fontSize: "42px",
             fontWeight:
               "bold",
             margin: 0,
@@ -86,10 +80,7 @@ export default function FinishedPage() {
         <h1
           style={{
             color: "#facc15",
-            fontSize:
-              window.innerWidth < 600
-                ? "34px"
-                : "58px",
+            fontSize: "58px",
             fontWeight:
               "bold",
             marginBottom:
@@ -151,11 +142,7 @@ export default function FinishedPage() {
                         "#10263d",
                       borderRadius:
                         "20px",
-                      padding:
-                        window.innerWidth <
-                        600
-                          ? "16px"
-                          : "20px",
+                      padding: "20px",
                       border:
                         "1px solid rgba(255,255,255,0.08)",
                       transition:
@@ -205,12 +192,8 @@ export default function FinishedPage() {
                           match.league
                             .logo
                         }
-                        width={
-                          window.innerWidth <
-                          600
-                            ? "24"
-                            : "30"
-                        }
+                        width="30"
+                        alt=""
                       />
 
                       <span
@@ -218,10 +201,7 @@ export default function FinishedPage() {
                           color:
                             "#cbd5e1",
                           fontSize:
-                            window.innerWidth <
-                            600
-                              ? "16px"
-                              : "18px",
+                            "18px",
                         }}
                       >
                         {
@@ -266,20 +246,15 @@ export default function FinishedPage() {
                           }
                           style={{
                             width:
-                              window.innerWidth <
-                              600
-                                ? "58px"
-                                : "72px",
+                              "72px",
 
                             height:
-                              window.innerWidth <
-                              600
-                                ? "58px"
-                                : "72px",
+                              "72px",
 
                             objectFit:
                               "contain",
                           }}
+                          alt=""
                         />
 
                         <div
@@ -289,10 +264,7 @@ export default function FinishedPage() {
                             fontWeight:
                               "bold",
                             fontSize:
-                              window.innerWidth <
-                              600
-                                ? "15px"
-                                : "18px",
+                              "18px",
                             lineHeight:
                               "20px",
                           }}
@@ -317,10 +289,7 @@ export default function FinishedPage() {
                         <div
                           style={{
                             fontSize:
-                              window.innerWidth <
-                              600
-                                ? "38px"
-                                : "48px",
+                              "48px",
 
                             fontWeight:
                               "bold",
@@ -354,10 +323,7 @@ export default function FinishedPage() {
                             fontWeight:
                               "bold",
                             fontSize:
-                              window.innerWidth <
-                              600
-                                ? "18px"
-                                : "20px",
+                              "20px",
                           }}
                         >
                           FT
@@ -387,20 +353,15 @@ export default function FinishedPage() {
                           }
                           style={{
                             width:
-                              window.innerWidth <
-                              600
-                                ? "58px"
-                                : "72px",
+                              "72px",
 
                             height:
-                              window.innerWidth <
-                              600
-                                ? "58px"
-                                : "72px",
+                              "72px",
 
                             objectFit:
                               "contain",
                           }}
+                          alt=""
                         />
 
                         <div
@@ -410,10 +371,7 @@ export default function FinishedPage() {
                             fontWeight:
                               "bold",
                             fontSize:
-                              window.innerWidth <
-                              600
-                                ? "15px"
-                                : "18px",
+                              "18px",
                             lineHeight:
                               "20px",
                           }}
@@ -438,10 +396,7 @@ export default function FinishedPage() {
                         textAlign:
                           "center",
                         fontSize:
-                          window.innerWidth <
-                          600
-                            ? "13px"
-                            : "15px",
+                          "15px",
                       }}
                     >
                       {new Date(
