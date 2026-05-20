@@ -1,19 +1,94 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 export default function StandingsPage() {
-  const [tables, setTables] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [countries, setCountries] =
+    useState([]);
 
+  const [searchTeam, setSearchTeam] =
+    useState("");
+
+  const [openedCountry, setOpenedCountry] =
+    useState(null);
+
+  const [openedLeague, setOpenedLeague] =
+    useState(null);
+
+  const [leagueTable, setLeagueTable] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  // FETCH LEAGUES
   useEffect(() => {
-    async function fetchStandings() {
+    async function fetchLeagues() {
       try {
-        const res = await fetch("/api/standings");
-        const data = await res.json();
+        const res =
+          await fetch(
+            "/api/leagues"
+          );
 
-        if (data.response) {
-          setTables(data.response);
+        const data =
+          await res.json();
+
+        if (
+          data.response
+        ) {
+          // GROUP BY COUNTRY
+          const grouped =
+            {};
+
+          data.response.forEach(
+            (item) => {
+              const country =
+                item.country
+                  .name;
+
+              if (
+                !grouped[
+                  country
+                ]
+              ) {
+                grouped[
+                  country
+                ] = [];
+              }
+
+              grouped[
+                country
+              ].push(item);
+            }
+          );
+
+          const result =
+            Object.entries(
+              grouped
+            ).map(
+              ([
+                country,
+                leagues,
+              ]) => ({
+                country,
+                leagues,
+              })
+            );
+
+          // SORT COUNTRIES
+          result.sort(
+            (a, b) =>
+              a.country.localeCompare(
+                b.country
+              )
+          );
+
+          setCountries(
+            result
+          );
         }
       } catch (error) {
         console.log(error);
@@ -22,199 +97,518 @@ export default function StandingsPage() {
       setLoading(false);
     }
 
-    fetchStandings();
+    fetchLeagues();
   }, []);
 
+  // FETCH TABLE
+async function openLeague(
+  league
+) {
+  try {
+    const leagueId =
+      league.league.id;
+
+    // TOGGLE OPEN/CLOSE
+    if (
+      openedLeague ===
+      leagueId
+    ) {
+      setOpenedLeague(
+        null
+      );
+
+      return;
+    }
+
+    setOpenedLeague(
+      leagueId
+    );
+
+    const res =
+      await fetch(
+        `/api/standings?league=${leagueId}&season=2025`
+      );
+
+    const data =
+      await res.json();
+
+    if (
+      data.response?.[0]
+    ) {
+      setLeagueTable(
+        data.response[0]
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+  // LOADING
   if (loading) {
     return (
       <div
         style={{
-          background: "#111827",
+          background:
+            "#0f172a",
           color: "white",
-          minHeight: "100vh",
+          minHeight:
+            "100vh",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "40px",
-          fontWeight: "bold",
+          justifyContent:
+            "center",
+          alignItems:
+            "center",
+          fontSize:
+            "35px",
+          fontWeight:
+            "bold",
         }}
       >
-        Loading Tables...
+        Loading Leagues...
       </div>
     );
   }
 
-  return (
-    <div
-      style={{
-        background: "#111827",
-        color: "white",
-        minHeight: "100vh",
-        padding: "20px",
-        paddingBottom: "140px",
-      }}
-    >
+ return (
+  <div
+    style={{
+      background: "#0f172a",
+      color: "white",
+      minHeight: "100vh",
+      padding: "20px",
+      paddingBottom: "120px",
+    }}
+  >
+
+   <input
+  type="text"
+  placeholder="Search team..."
+  value={searchTeam || ""}
+  onChange={(e) =>
+    setSearchTeam(e.target.value)
+  }
+  style={{
+    width: "100%",
+    padding: "12px",
+    marginBottom: "20px",
+    borderRadius: "10px",
+    border: "none",
+    fontSize: "16px",
+  }}
+/>
+      {/* HEADER */}
       <h1
         style={{
-          color: "#a855f7",
-          fontSize: "55px",
-          marginBottom: "30px",
+          color:
+            "#f472b6",
+          fontSize:
+            "50px",
+          marginBottom:
+            "30px",
         }}
       >
         🏆 League Tables
       </h1>
 
-      {tables.map((leagueData, index) => (
-        <div
-          key={index}
-          style={{
-            background: "#1f2937",
-            borderRadius: "20px",
-            padding: "20px",
-            marginBottom: "40px",
-            overflowX: "auto",
-          }}
-        >
-          {/* LEAGUE HEADER */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "15px",
-              marginBottom: "25px",
-            }}
-          >
-            <img
-              src={leagueData.league.logo}
-              width="50"
-            />
+{/* COUNTRIES */}
+{countries
+  .filter((countryData) =>
+    (
+      countryData.country?.name || ""
+    )
+      .toLowerCase()
+      .includes(
+        searchTeam
+          .toLowerCase()
+          .trim()
+      ) ||
 
-            <div>
+    countryData.leagues?.some(
+      (league) =>
+        (
+          league.league.name || ""
+        )
+          .toLowerCase()
+          .includes(
+            searchTeam
+              .toLowerCase()
+              .trim()
+          )
+    )
+  )
+  .map((countryData, index) => (
+    <div
+      key={index}
+      style={{
+        marginBottom: "18px",
+        background: "#111827",
+        borderRadius: "18px",
+        overflow: "hidden",
+      }}
+    >
+            {/* COUNTRY HEADER */}
+            <div
+              onClick={() =>
+                setOpenedCountry(
+                  openedCountry ===
+                    countryData.country
+                    ? null
+                    : countryData.country
+                )
+              }
+              style={{
+                padding:
+                  "18px",
+                cursor:
+                  "pointer",
+                display:
+                  "flex",
+                justifyContent:
+                  "space-between",
+                alignItems:
+                  "center",
+                background:
+                  "#1f2937",
+              }}
+            >
               <h2
                 style={{
-                  color: "#22c55e",
                   margin: 0,
+                  fontSize:
+                    "24px",
                 }}
               >
-                {leagueData.league.name}
+                {
+                  countryData.country
+                }
               </h2>
 
-              <p
+              <span
                 style={{
-                  color: "#9ca3af",
-                  marginTop: "5px",
+                  fontSize:
+                    "22px",
                 }}
               >
-                {leagueData.league.country}
-              </p>
+                {openedCountry ===
+                countryData.country
+                  ? "−"
+                  : "+"}
+              </span>
             </div>
-          </div>
 
-          {/* TABLE */}
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              minWidth: "700px",
-            }}
-          >
-            <thead>
-              <tr
-                style={{
-                  background: "#374151",
-                }}
-              >
-                <th style={thStyle}>#</th>
-                <th style={thStyle}>Team</th>
-                <th style={thStyle}>Pts</th>
-                <th style={thStyle}>P</th>
-                <th style={thStyle}>W</th>
-                <th style={thStyle}>D</th>
-                <th style={thStyle}>L</th>
-                <th style={thStyle}>GD</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {leagueData.league.standings[0]?.map(
-                (team) => (
-                  <tr
-                    key={team.team.id}
-                    style={{
-                      borderBottom:
-                        "1px solid #374151",
-                      transition: "0.3s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "#374151";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background =
-                        "transparent";
-                    }}
-                  >
-                    <td style={tdStyle}>
-                      {team.rank}
-                    </td>
-
-                    <td style={tdStyle}>
+            {/* LEAGUES */}
+            {openedCountry ===
+              countryData.country && (
+              <div>
+                {countryData.leagues.map(
+                  (
+                    league,
+                    i
+                  ) => (
+                    <div
+                      key={i}
+                      style={{
+                        borderTop:
+                          "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {/* LEAGUE BUTTON */}
                       <div
+                        onClick={() =>
+                          openLeague(
+                            league
+                          )
+                        }
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
+                          padding:
+                            "16px",
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
+                          gap: "15px",
+                          cursor:
+                            "pointer",
+                          transition:
+                            "0.3s",
                         }}
                       >
                         <img
-                          src={team.team.logo}
-                          width="28"
+                          src={
+                            league
+                              .league
+                              .logo
+                          }
+                          width="34"
+                          height="34"
+                          alt=""
                         />
 
-                        {team.team.name}
+                        <span
+                          style={{
+                            fontSize:
+                              "18px",
+                            fontWeight:
+                              "bold",
+                          }}
+                        >
+                          {
+                            league
+                              .league
+                              .name
+                          }
+                        </span>
                       </div>
-                    </td>
 
-                    <td style={tdStyle}>
-                      {team.points}
-                    </td>
+                      {/* TABLE */}
+                      {openedLeague ===
+                        league
+                          .league
+                          .id &&
+                        leagueTable && (
+                          <div
+                            style={{
+                              overflowX:
+                                "auto",
+                              padding:
+                                "10px",
+                            }}
+                          >
+                            <table
+                              style={{
+                                width:
+                                  "100%",
+                                minWidth:
+                                  "700px",
+                                borderCollapse:
+                                  "collapse",
+                              }}
+                            >
+                              <thead>
+                                <tr
+                                  style={{
+                                    background:
+                                      "#374151",
+                                  }}
+                                >
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    #
+                                  </th>
 
-                    <td style={tdStyle}>
-                      {team.all.played}
-                    </td>
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    Team
+                                  </th>
 
-                    <td style={tdStyle}>
-                      {team.all.win}
-                    </td>
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    Pts
+                                  </th>
 
-                    <td style={tdStyle}>
-                      {team.all.draw}
-                    </td>
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    P
+                                  </th>
 
-                    <td style={tdStyle}>
-                      {team.all.lose}
-                    </td>
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    W
+                                  </th>
 
-                    <td style={tdStyle}>
-                      {team.goalsDiff}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      ))}
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    D
+                                  </th>
+
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    L
+                                  </th>
+
+                                  <th
+                                    style={
+                                      thStyle
+                                    }
+                                  >
+                                    GD
+                                  </th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                {leagueTable.league.standings[0]?.map(
+                                  (
+                                    team
+                                  ) => (
+                                    <tr
+                                      key={
+                                        team
+                                          .team
+                                          .id
+                                      }
+                                      style={{
+                                        borderBottom:
+                                          "1px solid rgba(255,255,255,0.08)",
+                                      }}
+                                    >
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team.rank
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        <div
+                                          style={{
+                                            display:
+                                              "flex",
+                                            alignItems:
+                                              "center",
+                                            gap:
+                                              "10px",
+                                          }}
+                                        >
+                                          <img
+                                            src={
+                                              team
+                                                .team
+                                                .logo
+                                            }
+                                            width="25"
+                                            alt=""
+                                          />
+
+                                          {
+                                            team
+                                              .team
+                                              .name
+                                          }
+                                        </div>
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team.points
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team
+                                            .all
+                                            .played
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team
+                                            .all
+                                            .win
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team
+                                            .all
+                                            .draw
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team
+                                            .all
+                                            .lose
+                                        }
+                                      </td>
+
+                                      <td
+                                        style={
+                                          tdStyle
+                                        }
+                                      >
+                                        {
+                                          team.goalsDiff
+                                        }
+                                      </td>
+                                    </tr>
+                                  )
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        )
+      )}
     </div>
   );
 }
 
 const thStyle = {
-  padding: "15px",
+  padding: "14px",
   textAlign: "left",
   color: "#facc15",
 };
 
 const tdStyle = {
-  padding: "15px",
+  padding: "14px",
 };
