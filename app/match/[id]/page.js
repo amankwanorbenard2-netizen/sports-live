@@ -6,6 +6,8 @@ import {
   use,
 } from "react";
 
+import "./match.css";
+
 export default function MatchPage({
   params,
 }) {

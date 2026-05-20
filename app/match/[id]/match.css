@@ -1,0 +1,30 @@
+.goal-animation {
+  animation:
+    pulseGoal 1.2s infinite;
+}
+
+@keyframes pulseGoal {
+
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+.live-card:hover {
+  transform: scale(1.02);
+  transition: 0.3s ease;
+}
+
+.goal-glow {
+  box-shadow:
+    0 0 25px rgba(34,197,94,0.7);
+}
