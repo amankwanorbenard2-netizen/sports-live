@@ -9,7 +9,7 @@ export default async function PlayerPage(
 
   const response =
     await fetch(
-      `http://localhost:3000/api/player/${id}`,
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/player/${id}`,
       {
         cache: "no-store",
       }
@@ -60,7 +60,7 @@ export default async function PlayerPage(
       ) || [];
 const transferResponse =
   await fetch(
-    `http://localhost:3000/api/transfers?player=${id}`,
+    `${process.env.NEXT_PUBLIC_SITE_URL}/api/transfers?player=${id}`,
     {
       cache: "no-store",
     }
@@ -74,7 +74,7 @@ const transfers =
     ?.transfers || [];
     const injuryResponse =
   await fetch(
-    `http://localhost:3000/api/injuries?player=${id}`,
+    `${process.env.NEXT_PUBLIC_SITE_URL}/api/injuries?player=${id}`,
     {
       cache: "no-store",
     }
