@@ -1,118 +1,16 @@
-"use client";
-
 import "./globals.css";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import BottomNavWrapper from "../components/BottomNavWrapper";
 
-function BottomNav() {
-  const pathname = usePathname();
+export const metadata = {
+  title: "BEN SPORTS",
 
-  const navItems = [
-    {
-      name: "Home",
-      link: "/",
-      icon: "🏠",
-    },
+  description:
+    "Live scores, football news, fixtures and player statistics",
 
-    {
-      name: "Live",
-      link: "/live",
-      icon: "🔴",
-    },
-
-    {
-      name: "Fixtures",
-      link: "/fixtures",
-      icon: "📅",
-    },
-
-    {
-      name: "Finished",
-      link: "/finished",
-      icon: "✅",
-    },
-
-    {
-      name: "Tables",
-      link: "/standings",
-      icon: "🏆",
-    },
-
-    {
-      name: "News",
-      link: "/news",
-      icon: "📰",
-    },
-  ];
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        width: "100%",
-        background: "#111827",
-        borderTop: "1px solid #374151",
-        display: "flex",
-        justifyContent: "space-around",
-        alignItems: "center",
-        padding: "8px 0",
-        zIndex: 999,
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      {navItems.map((item) => {
-        const active =
-          pathname === item.link;
-
-        return (
-          <Link
-            key={item.name}
-            href={item.link}
-            style={{
-              textDecoration: "none",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                color: active
-                  ? "#22c55e"
-                  : "#9ca3af",
-                fontSize: "11px",
-                transition: "0.3s",
-                cursor: "pointer",
-                minWidth: "55px",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform =
-                  "scale(1.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform =
-                  "scale(1)";
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "20px",
-                  marginBottom: "2px",
-                }}
-              >
-                {item.icon}
-              </span>
-
-              <span>{item.name}</span>
-            </div>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
+  icons: {
+    icon: "/logo.jpeg",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -141,12 +39,13 @@ export default function RootLayout({
           style={{
             maxWidth: "100vw",
             overflowX: "hidden",
+            paddingBottom: "90px",
           }}
         >
           {children}
         </div>
 
-        <BottomNav />
+        <BottomNavWrapper />
       </body>
     </html>
   );

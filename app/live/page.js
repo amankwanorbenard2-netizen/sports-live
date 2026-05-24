@@ -182,13 +182,30 @@ export default function LivePage() {
                   >
                     <div
                       style={{
-                        background: "#1f2937",
-                        borderRadius: "20px",
-                        padding: "20px",
-                        border:
-                          "1px solid #374151",
-                        transition: "0.3s",
-                        cursor: "pointer",
+                       background:
+  "linear-gradient(145deg,#10263d,#0b1c2c)",
+
+borderRadius: "24px",
+
+padding: "22px",
+
+boxShadow:
+  match.fixture.status.short === "1H" ||
+  match.fixture.status.short === "2H"
+    ? "0 0 25px rgba(239,68,68,0.35)"
+    : "0 10px 30px rgba(0,0,0,0.45)",
+
+border:
+  "1px solid rgba(255,255,255,0.08)",
+
+transition:
+  "all 0.3s ease",
+
+cursor: "pointer",
+
+position: "relative",
+
+overflow: "hidden",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform =
@@ -214,11 +231,18 @@ export default function LivePage() {
                         }}
                       >
                         🔴 LIVE{" "}
-                        {
-                          match.fixture.status
-                            .elapsed
-                        }
-                        '
+                       <span
+  style={{
+    color: "#ff4d4d",
+    fontWeight: "bold",
+    textShadow:
+      "0 0 10px #ff4d4d",
+    animation:
+      "pulse 1s infinite",
+  }}
+>
+  {match.fixture.status.elapsed}'
+</span>
                       </div>
 
                       {/* TEAMS */}

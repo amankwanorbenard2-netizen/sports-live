@@ -5,7 +5,8 @@ import {
   useState,
   use,
 } from "react";
-
+import { useRouter,}
+   from "next/navigation";
 import "./match.css";
 
 export default function MatchPage({
@@ -14,6 +15,8 @@ export default function MatchPage({
 
   const resolvedParams =
     use(params);
+    const router =
+  useRouter(); 
 
   const [match, setMatch] =
   useState(null);
@@ -96,53 +99,21 @@ const [activeTab, setActiveTab] =
     eventsJson.response || []
   );
 
-  // GENERATE HOME FORM
-  const generatedHomeForm =
-    Array.from(
-      { length: 5 },
-      () => {
+// GENERATE HOME FORM
+const generatedHomeForm =
+  ["W", "W", "D", "L", "W"];
 
-        const random =
-          Math.random();
+// GENERATE AWAY FORM
+const generatedAwayForm =
+  ["L", "D", "W", "L", "D"];
 
-        if (random > 0.65)
-          return "W";
+setHomeForm(
+  generatedHomeForm
+);
 
-        if (random > 0.35)
-          return "D";
-
-        return "L";
-
-      }
-    );
-
-  // GENERATE AWAY FORM
-  const generatedAwayForm =
-    Array.from(
-      { length: 5 },
-      () => {
-
-        const random =
-          Math.random();
-
-        if (random > 0.65)
-          return "W";
-
-        if (random > 0.35)
-          return "D";
-
-        return "L";
-
-      }
-    );
-
-  setHomeForm(
-    generatedHomeForm
-  );
-
-  setAwayForm(
-    generatedAwayForm
-  );
+setAwayForm(
+  generatedAwayForm
+);
 
 } catch (error) {
 
@@ -151,49 +122,51 @@ const [activeTab, setActiveTab] =
 } finally {
 
   setLoading(false);
+
 }
+
 }
-  // LOAD MATCH
-  useEffect(() => {
 
-    fetchMatch();
+// LOAD MATCH
+useEffect(() => {
 
-  }, [resolvedParams.id]);
+  fetchMatch();
 
-  // AUTO REFRESH
-  useEffect(() => {
+}, [resolvedParams.id]);
 
-    if (
-      match?.fixture?.status
-        ?.short === "1H" ||
+// AUTO REFRESH
+useEffect(() => {
 
-      match?.fixture?.status
-        ?.short === "2H" ||
-
-      match?.fixture?.status
-        ?.short === "HT" ||
-
-      match?.fixture?.status
-        ?.short === "LIVE"
-    ) {
-
-      const interval =
-        setInterval(() => {
-
-          fetchMatch();
-
-        }, 60000);
-
-      return () =>
-        clearInterval(interval);
-
-    }
-
-  }, [
+  if (
     match?.fixture?.status
-      ?.short,
-  ]);
+      ?.short === "1H" ||
 
+    match?.fixture?.status
+      ?.short === "2H" ||
+
+    match?.fixture?.status
+      ?.short === "HT" ||
+
+    match?.fixture?.status
+      ?.short === "LIVE"
+  ) {
+
+    const interval =
+      setInterval(() => {
+
+        fetchMatch();
+
+      }, 60000);
+
+    return () =>
+      clearInterval(interval);
+
+  }
+
+}, [
+  match?.fixture?.status
+    ?.short,
+]);
   // ORGANIZE PLAYERS
   function organizePlayers(
     team,
@@ -282,35 +255,83 @@ const [activeTab, setActiveTab] =
 
   }
 
-  // LOADING
-  if (loading || !match) {
+if (loading || !match) {
 
-    return (
+  return (
+
+    <div
+      style={{
+        background:
+          "linear-gradient(to bottom,#031525,#071b2d,#0f172a)",
+        minHeight:
+          "100vh",
+        color: "white",
+        display: "flex",
+        flexDirection:
+          "column",
+        justifyContent:
+          "center",
+        alignItems:
+          "center",
+        gap: "25px",
+      }}
+    >
 
       <div
         style={{
-          background:
-            "#071b2d",
-          minHeight:
-            "100vh",
-          color: "white",
-          display: "flex",
-          justifyContent:
-            "center",
-          alignItems:
-            "center",
-          fontSize: "28px",
-          fontWeight:
-            "bold",
+          fontSize: "42px",
+          fontWeight: "900",
+          letterSpacing: "2px",
+          color: "#facc15",
+        }}
+      >
+        BEN SPORTS
+      </div>
+
+      <div
+        style={{
+          width: "90px",
+          height: "90px",
+          borderRadius: "50%",
+          border:
+            "6px solid rgba(255,255,255,0.15)",
+          borderTop:
+            "6px solid #facc15",
+          animation:
+            "spin 1s linear infinite",
+        }}
+      />
+
+      <div
+        style={{
+          fontSize: "30px",
+          fontWeight: "bold",
         }}
       >
         Loading Match...
       </div>
 
-    );
+      <style>
+        {`
+          @keyframes spin {
 
-  }
+            0% {
+              transform: rotate(0deg);
+            }
 
+            100% {
+              transform: rotate(360deg);
+            }
+
+          }
+        `}
+      </style>
+
+    </div>
+
+  );
+
+}
   const homeTeam =
     lineups[0];
 
@@ -364,10 +385,50 @@ const pulseAnimation = `
 <style>
   {pulseAnimation}
 </style>
+   <div
+  style={{
+    padding: "20px 20px 0",
+  }}
+>
+
+  <button
+    onClick={() =>
+      window.history.back()
+    }
+    style={{
+      background:
+        "rgba(255,255,255,0.08)",
+
+      border:
+        "1px solid rgba(255,255,255,0.1)",
+
+      color: "white",
+
+      padding:
+        "10px 18px",
+
+      borderRadius:
+        "14px",
+
+      fontWeight:
+        "bold",
+
+      cursor: "pointer",
+
+      fontSize: "15px",
+
+      backdropFilter:
+        "blur(10px)",
+    }}
+  >
+    ← Back
+  </button>
+
+</div>
       {/* HEADER */}
       <div
         style={{
-          padding: "25px",
+         padding: "70px 25px 25px",
           textAlign: "center",
         }}
       >
@@ -421,6 +482,8 @@ const pulseAnimation = `
                 margin: 0,
                 color:
                   "#facc15",
+                  textShadow:
+  "0 0 25px rgba(250,204,21,0.9)",
               }}
             >
               {
@@ -443,11 +506,22 @@ const pulseAnimation = `
     ? "#ef4444"
     : "#334155",
                 padding:
-                  "6px 14px",
+                  "10px 18px",
+                  animation:
+  match.fixture.status.short === "LIVE" ||
+  match.fixture.status.short === "1H" ||
+  match.fixture.status.short === "2H"
+    ? "pulse 1.5s infinite"
+    : "none",
                 borderRadius:
                   "999px",
                 fontWeight:
                   "bold",
+                  fontSize:
+  "15px",
+
+letterSpacing:
+  "0.5px",
                 display:
                   "inline-block",
                   boxShadow:
@@ -587,12 +661,28 @@ const pulseAnimation = `
                   : "#fff",
 
               border: "none",
+              transform:
+  activeTab === tab
+    ? "translateY(-2px)"
+    : "translateY(0)",
+
+boxShadow:
+  activeTab === tab
+    ? "0 8px 25px rgba(250,204,21,0.45)"
+    : "none",
 
               padding:
                 "12px 18px",
 
               borderRadius:
                 "12px",
+                transition:
+  "all 0.3s ease",
+
+boxShadow:
+  activeTab === tab
+    ? "0 0 20px rgba(250,204,21,0.5)"
+    : "none",
 
               fontWeight:
                 "bold",
@@ -687,7 +777,7 @@ const pulseAnimation = `
                 }}
               >
 
-                {row.map(
+                {row.map( 
                   (
                     player,
                     i
@@ -699,6 +789,8 @@ const pulseAnimation = `
                       statistics={
                         player.statistics
                       }
+                      router={router}
+                  
                     />
 
                   )
@@ -712,7 +804,7 @@ const pulseAnimation = `
           {/* SPACE */}
           <div
             style={{
-              height: "220px",
+              height: "120px",
             }}
           />
 
@@ -749,8 +841,8 @@ const pulseAnimation = `
                       statistics={
                         player.statistics
                       }
+                      router={router}
                     />
-
                   )
                 )}
 
@@ -812,6 +904,7 @@ const pulseAnimation = `
                   statistics={
                     playerData.statistics
                   }
+                  router={router}
                 />
 
               )
@@ -848,6 +941,7 @@ const pulseAnimation = `
                   statistics={
                     playerData.statistics
                   }
+                  router={router} 
                 />
 
               )
@@ -1230,12 +1324,13 @@ const pulseAnimation = `
                             "bold",
                         }}
                       >
-                        IN:
-                        {" "}
-                        {
-                          event.player
-                            ?.name
-                        }
+                       IN:
+{" "}
+{
+  event.player
+    ?.name ||
+  "Unknown Player"
+}
                       </div>
 
                       <div
@@ -1271,10 +1366,11 @@ const pulseAnimation = `
                             "18px",
                         }}
                       >
-                        {
-                          event.player
-                            ?.name
-                        }
+                       {
+  event.player
+    ?.name ||
+  "Unknown Player"
+}
                       </div>
 
                       <div
@@ -1330,6 +1426,7 @@ const pulseAnimation = `
 
       )}
 {/* FORM GUIDE */}
+{activeTab === "overview" && (
 <div
   style={{
     padding: "20px",
@@ -1505,206 +1602,143 @@ const pulseAnimation = `
     </div>
 
   </div>
-
 </div>
+)}
       {/* COMMENTARY */}
-      {activeTab === "commentary" && (
+{activeTab === "commentary" && (
+
+  <div
+    style={{
+      padding: "20px",
+    }}
+  >
+
+    <h2
+      style={{
+        color: "#facc15",
+        marginBottom: "20px",
+      }}
+    >
+      Live Commentary
+    </h2>
+
+    {events.map((event, index) => (
+
+      <div
+        key={index}
+        style={{
+          background: "#10263d",
+          padding: "18px",
+          borderRadius: "18px",
+          marginBottom: "16px",
+          borderLeft: "5px solid #facc15",
+        }}
+      >
 
         <div
           style={{
-            padding: "20px",
+            color: "#facc15",
+            fontWeight: "bold",
+            marginBottom: "8px",
           }}
         >
-
-          <h2
-            style={{
-              color: "#facc15",
-              marginBottom:
-                "20px",
-            }}
-          >
-            Live Commentary
-          </h2>
-
-          {events.map(
-            (
-              event,
-              index
-            ) => (
-
-              <div
-                key={index}
-                style={{
-                  background:
-                    "#10263d",
-                  padding:
-                    "18px",
-                  borderRadius:
-                    "18px",
-                  marginBottom:
-                    "16px",
-                  borderLeft:
-                    "5px solid #facc15",
-                }}
-              >
-
-                <div
-                  style={{
-                    color:
-                      "#facc15",
-                    fontWeight:
-                      "bold",
-                    marginBottom:
-                      "8px",
-                  }}
-                >
-                  {
-                    event.time
-                      ?.elapsed
-                  }
-                  '
-                </div>
-
-                <div>
-
-                  {/* GOAL */}
-                  {event.type ===
-                  "Goal" && (
-
-                    <div>
-
-                      ⚽ GOAL!
-
-                      {" "}
-
-                      <strong>
-                        {
-                          event.player
-                            ?.name
-                        }
-                      </strong>
-
-                      scored for{" "}
-
-                      {
-                        event.team
-                          ?.name
-                      }
-
-                      {event.assist
-                        ?.name && (
-
-                        <>
-                          {" "}
-                          — Assist by{" "}
-
-                          <strong>
-                            {
-                              event.assist
-                                ?.name
-                            }
-                          </strong>
-                        </>
-
-                      )}
-
-                    </div>
-
-                  )}
-
-                  {/* CARD */}
-                  {event.type ===
-                  "Card" && (
-
-                    <div>
-
-                      {event.detail ===
-                      "Yellow Card"
-                        ? "🟨"
-                        : "🟥"}
-
-                      {" "}
-
-                      <strong>
-                        {
-                          event.player
-                            ?.name
-                        }
-                      </strong>
-
-                      received a{" "}
-
-                      {
-                        event.detail
-                      }.
-
-                    </div>
-
-                  )}
-
-                  {/* SUB */}
-                  {event.type ===
-                  "subst" && (
-
-                    <div>
-
-                      🔄 Substitution for{" "}
-
-                      {
-                        event.team
-                          ?.name
-                      }
-
-                      <br />
-
-                      IN:
-                      {" "}
-
-                      <strong>
-                        {
-                          event.player
-                            ?.name
-                        }
-                      </strong>
-
-                      <br />
-
-                      OUT:
-                      {" "}
-
-                      <strong>
-                        {
-                          event.assist
-                            ?.name ||
-                          "Unknown"
-                        }
-                      </strong>
-
-                    </div>
-
-                  )}
-
-                </div>
-
-              </div>
-
-            )
-          )}
-
+          {event.time?.elapsed}'
         </div>
 
-      )}
+        {/* GOAL */}
+        {event.type === "Goal" && (
 
-    </div>
+          <div>
 
+            ⚽ GOAL!{" "}
+
+            <strong>
+              {event.team?.name || "Unknown Team"}
+            </strong>
+
+            {" "}scored for{" "}
+
+            {event.team?.name}
+
+            {event.assist?.name && (
+              <>
+                {" "}— Assist by{" "}
+                <strong>
+                  {event.assist?.name || "Unknown Player"}
+                </strong>
+              </>
+            )}
+
+          </div>
+
+        )}
+
+        {/* CARD */}
+        {event.type === "Card" && (
+
+          <div>
+
+            {event.detail === "Yellow Card"
+              ? "🟨"
+              : "🟥"}{" "}
+
+            <strong>
+            {event.team?.name || "Unknown Team"}
+            </strong>
+
+            {" "}received a{" "}
+
+            {event.detail}
+
+          </div>
+
+        )}
+
+        {/* SUB */}
+        {event.type === "subst" && (
+
+          <div>
+
+            🔄 Substitution for{" "}
+            {event.team?.name}
+
+            <br />
+
+            IN:{" "}
+
+            <strong>
+              {event.assist?.name || "Unknown Player"}
+            </strong>
+
+            <br />
+
+            OUT:{" "}
+
+            <strong>
+             {event.assist?.name || "Unknown Player"}
+            </strong>
+
+          </div>
+
+        )}
+
+      </div>
+
+    ))}
+</div>
+  )}
+     </div>
   );
-
 }
 
 function PlayerCard({
   player,
   statistics,
+  router,
 }) {
+
+ 
+
 
   // GET REAL PLAYER RATING
   let rating = null;
@@ -1757,19 +1791,30 @@ function PlayerCard({
         .toFixed(1);
 
   }
-
+const isMobile =
+  typeof window !==
+    "undefined" &&
+  window.innerWidth < 600;
   return (
 
-    <div
-      style={{
+   <div
+  onClick={() =>
+    router.push(`/player/${player.id}`)
+  }
+
+  style={{
         textAlign:
           "center",
        width:
-  window.innerWidth < 600
+  isMobile
     ? "72px"
     : "90px",
         position:
           "relative",
+          cursor: "pointer",
+
+transition:
+  "all 0.2s ease",
       }}
     >
 
@@ -1828,12 +1873,12 @@ function PlayerCard({
         }
         style={{
          width:
-  window.innerWidth < 600
+  isMobile
     ? "58px"
     : "72px",
 
 height:
-  window.innerWidth < 600
+  isMobile
     ? "58px"
     : "72px",
           borderRadius:
@@ -1853,13 +1898,13 @@ height:
           marginTop:
             "8px",
           fontSize:
-  window.innerWidth < 600
+  isMobile
     ? "10px"
     : "13px",
           fontWeight:
             "bold",
          lineHeight:
-  window.innerWidth < 600
+  isMobile
     ? "12px"
     : "16px",
         }}
@@ -1871,7 +1916,7 @@ height:
       <div
         style={{
           fontSize:
-  window.innerWidth < 600
+  isMobile
     ? "10px"
     : "12px",
           opacity: 0.85,

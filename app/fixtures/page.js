@@ -200,6 +200,41 @@ export default function FixturesPage() {
           gap: "18px",
         }}
       >
+        <div
+  style={{
+    display: "flex",
+    gap: "12px",
+    marginBottom: "25px",
+    overflowX: "auto",
+  }}
+>
+
+  {["TODAY", "SAT", "SUN", "MON"].map((day) => (
+
+    <div
+      key={day}
+      style={{
+        padding: "10px 18px",
+        borderRadius: "14px",
+        background:
+          day === "TODAY"
+            ? "#facc15"
+            : "#1e293b",
+        color:
+          day === "TODAY"
+            ? "#000"
+            : "#fff",
+        fontWeight: "bold",
+        fontSize: "14px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {day}
+    </div>
+
+  ))}
+
+</div>
         {matches.map(
           (match, index) => {
             const isLive =

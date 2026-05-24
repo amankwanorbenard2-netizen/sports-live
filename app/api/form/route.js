@@ -10,56 +10,99 @@ export async function GET(req) {
 
   try {
 
-  const response =
-  await fetch(
+    const response =
+      await fetch(
 
-    `https://v3.football.api-sports.io/fixtures?team=${team}&last=10&status=FT`,
+        `https://v3.football.api-sports.io/fixtures?team=${team}&last=10`,
 
-    {
-      method: "GET",
+        {
+          method: "GET",
 
-      headers: {
-        "x-apisports-key":
-          process.env.NEXT_PUBLIC_API_KEY,
+          headers: {
+            "x-apisports-key":
+              process.env.NEXT_PUBLIC_API_KEY,
 
-        "x-rapidapi-host":
-          "v3.football.api-sports.io",
-      },
-    }
+            "x-rapidapi-host":
+              "v3.football.api-sports.io",
+          },
+        }
 
-  );
+      );
+
     const data =
       await response.json();
-console.log(data);
+
+    console.log(data);
+
     const matches =
       data.response || [];
 
     const form =
-      matches.map((match) => {
+      matches.slice(0, 5).map(
+        (match) => {
 
-        const isHome =
-          match.teams.home.id ==
-          Number(team);
+          const homeId =
+            match.teams.home.id;
 
-        const teamGoals =
-          isHome
-            ? match.goals.home
-            : match.goals.away;
+          const awayId =
+            match.teams.away.id;
 
-        const opponentGoals =
-          isHome
-            ? match.goals.away
-            : match.goals.home;
+          const homeGoals =
+            match.goals.home;
 
-        if (teamGoals > opponentGoals)
-          return "W";
+          const awayGoals =
+            match.goals.away;
 
-        if (teamGoals < opponentGoals)
-          return "L";
+          // TEAM IS HOME
+          if (
+            Number(team) === homeId
+          ) {
 
-        return "D";
+            if (
+              homeGoals > awayGoals
+            ) {
 
-      });
+              return "W";
+
+            }
+
+            if (
+              homeGoals < awayGoals
+            ) {
+
+              return "L";
+
+            }
+
+            return "D";
+
+          }
+
+          // TEAM IS AWAY
+          else {
+
+            if (
+              awayGoals > homeGoals
+            ) {
+
+              return "W";
+
+            }
+
+            if (
+              awayGoals < homeGoals
+            ) {
+
+              return "L";
+
+            }
+
+            return "D";
+
+          }
+
+        }
+      );
 
     return NextResponse.json({
       form,
