@@ -505,7 +505,7 @@ const injuries =
 
       </div>
 {/* TRANSFER HISTORY */}
-{/* INJURY HISTORY */}
+{/* INJURIES */}
 
 <div
   style={{
@@ -530,24 +530,21 @@ const injuries =
         background:
           "rgba(255,255,255,0.05)",
 
+        borderRadius: "20px",
+
         padding: "25px",
 
-        borderRadius: "24px",
-
-        color: "#94a3b8",
-
-        border:
-          "1px solid rgba(255,255,255,0.08)",
+        color: "#cbd5e1",
       }}
     >
-      No current injury data available for this player.
+      No injury records found.
     </div>
 
   ) : (
 
     injuries.map(
       (
-        item,
+        injury,
         index
       ) => (
 
@@ -559,18 +556,16 @@ const injuries =
 
             borderRadius: "24px",
 
-            padding: "20px",
+            padding: "22px",
 
             marginBottom: "20px",
-
-            border:
-              "1px solid rgba(255,255,255,0.08)",
           }}
         >
 
           <h3>
             {
-              item.player?.name
+              injury.player
+                ?.name
             }
           </h3>
 
@@ -578,17 +573,27 @@ const injuries =
             Injury:
             {" "}
             {
-              item.player?.reason ||
-              "Unknown"
+              injury.player
+                ?.reason
             }
           </p>
 
           <p>
-            Type:
+            Fixture:
             {" "}
             {
-              item.player?.type ||
-              "Unknown"
+              injury.fixture
+                ?.league
+                ?.name
+            }
+          </p>
+
+          <p>
+            Date:
+            {" "}
+            {
+              injury.fixture
+                ?.date
             }
           </p>
 
