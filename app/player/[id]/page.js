@@ -1,5 +1,5 @@
-import BackButton from "@/components/BackButton";
 
+import BackButton from "@/components/BackButton";
 export default async function PlayerPage(
   { params }
 ) {

@@ -1,5 +1,6 @@
 "use client";
 
+
 import {
   useEffect,
   useState,
@@ -1155,38 +1156,114 @@ boxShadow:
                   }
                 </h3>
 
-                {team.statistics.map(
-                  (
-                    stat,
-                    i
-                  ) => (
+               {team.statistics.map((stat, i) => {
 
-                    <div
-                      key={i}
-                      style={{
-                        display:
-                          "flex",
-                        justifyContent:
-                          "space-between",
-                        padding:
-                          "8px 0",
-                        borderBottom:
-                          "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
+  const homeStat =
+    statistics[0]?.statistics?.find(
+      (s) => s.type === stat.type
+    )?.value;
 
-                      <span>
-                        {stat.type}
-                      </span>
+  const awayStat =
+    statistics[1]?.statistics?.find(
+      (s) => s.type === stat.type
+    )?.value;
 
-                      <strong>
-                        {stat.value || 0}
-                      </strong>
+  const homeValue =
+    parseFloat(
+      String(homeStat)
+        .replace("%", "")
+    ) || 0;
 
-                    </div>
+  const awayValue =
+    parseFloat(
+      String(awayStat)
+        .replace("%", "")
+    ) || 0;
 
-                  )
-                )}
+  const total =
+    homeValue + awayValue;
+
+  const homeWidth =
+    total > 0
+      ? (homeValue / total) * 100
+      : 50;
+
+  const awayWidth =
+    total > 0
+      ? (awayValue / total) * 100
+      : 50;
+
+  return (
+
+    <div
+      key={i}
+      style={{
+        marginBottom: "28px",
+      }}
+    >
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          marginBottom: "10px",
+          fontWeight: "bold",
+          fontSize: "18px",
+        }}
+      >
+
+        <span>
+          {homeStat || 0}
+        </span>
+
+        <span>
+          {stat.type}
+        </span>
+
+        <span>
+          {awayStat || 0}
+        </span>
+
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          height: "14px",
+          borderRadius: "999px",
+          overflow: "hidden",
+          background:
+            "#1e293b",
+        }}
+      >
+
+        <div
+          style={{
+            width:
+              `${homeWidth}%`,
+            background:
+              "#22c55e",
+          }}
+        />
+
+        <div
+          style={{
+            width:
+              `${awayWidth}%`,
+            background:
+              "#facc15",
+          }}
+        />
+
+      </div>
+
+    </div>
+
+  );
+
+})}
 
               </div>
 
