@@ -1,6 +1,5 @@
 import "./globals.css";
 import BottomNavWrapper from "../components/BottomNavWrapper";
-
 export const metadata = {
   title: "BEN SPORTS",
 
@@ -8,10 +7,14 @@ export const metadata = {
     "Live scores, football news, fixtures and player statistics",
 
   icons: {
-    icon: "/logo.jpeg",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
-
+export const viewport = {
+  themeColor: "#111827",
+};
 export default function RootLayout({
   children,
 }) {
