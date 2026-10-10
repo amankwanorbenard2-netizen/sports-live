@@ -1,54 +1,58 @@
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
-    const {
-      searchParams,
-    } = new URL(
-      request.url
+    const { searchParams } = new URL(request.url);
+
+    const league = searchParams.get("league");
+    const season = searchParams.get("season") || "2026";
+
+    if (!league) {
+      return NextResponse.json(
+        { error: "Missing league parameter" },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.API_FOOTBALL_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Football API key is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const response = await fetch(
+      `https://v3.football.api-sports.io/standings?league=${encodeURIComponent(league)}&season=${encodeURIComponent(season)}`,
+      {
+        method: "GET",
+        headers: {
+          "x-apisports-key": apiKey,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
     );
 
-    const league =
-      searchParams.get(
-        "league"
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: "Football API request failed", details: data },
+        { status: response.status }
       );
+    }
 
-    const season =
-      searchParams.get(
-        "season"
-      ) || "2024";
-
-    const response =
-      await fetch(
-        `https://v3.football.api-sports.io/standings?league=${league}&season=${season}`,
-        {
-          method: "GET",
-
-          headers: {
-            "x-apisports-key":
-              "e3f7de2b8a8f97d91582c713eb9651a1",
-
-            "x-rapidapi-host":
-              "v3.football.api-sports.io",
-
-            Accept:
-              "application/json",
-          },
-        }
-      );
-
-    const data =
-      await response.json();
-
-    console.log(data);
-
-    return Response.json(
-      data
-    );
+    return NextResponse.json(data);
   } catch (error) {
-    console.log(error);
+    console.error("Standings API error:", error);
 
-    return Response.json({
-      error:
-        error.message,
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch standings" },
+      { status: 500 }
+    );
   }
 }
