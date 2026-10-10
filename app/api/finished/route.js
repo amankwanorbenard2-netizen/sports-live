@@ -2,25 +2,22 @@
 const API_KEY = process.env.API_FOOTBALL_KEY;
 
 const leagues = [
-  { id: 39, name: "Premier League", country: "England" },
-  { id: 140, name: "La Liga", country: "Spain" },
-  { id: 135, name: "Serie A", country: "Italy" },
-  { id: 78, name: "Bundesliga", country: "Germany" },
-  { id: 61, name: "Ligue 1", country: "France" },
-  { id: 2, name: "UEFA Champions League", country: "World" },
-  { id: 3, name: "UEFA Europa League", country: "World" },
-  { id: 848, name: "UEFA Conference League", country: "World" },
-  { id: 13, name: "Copa Libertadores", country: "South America" },
-  { id: 71, name: "Brasileirão", country: "Brazil" },
-  { id: 128, name: "Ghana Premier League", country: "Ghana" },
-  { id: 253, name: "MLS", country: "USA" },
-  { id: 307, name: "Saudi Pro League", country: "Saudi Arabia" },
-  { id: 4, name: "UEFA European Championship", country: "World" },
-  { id: 1, name: "FIFA World Cup", country: "World" },
+  { id: 39, name: "Premier League", season: 2026 },
+  { id: 140, name: "La Liga", season: 2026 },
+  { id: 135, name: "Serie A", season: 2026 },
+  { id: 78, name: "Bundesliga", season: 2026 },
+  { id: 61, name: "Ligue 1", season: 2026 },
+  { id: 2, name: "UEFA Champions League", season: 2026 },
+  { id: 3, name: "UEFA Europa League", season: 2026 },
+  { id: 848, name: "UEFA Conference League", season: 2026 },
+  { id: 13, name: "Copa Libertadores", season: 2026 },
+  { id: 71, name: "Brasileirão", season: 2026 },
+  { id: 128, name: "Ghana Premier League", season: 2026 },
+  { id: 253, name: "MLS", season: 2026 },
+  { id: 307, name: "Saudi Pro League", season: 2026 },
 ];
 
-let cachedLeagues = null;
-let cacheExpiresAt = 0;
+const COMPLETED_STATUSES = new Set(["FT", "AET", "PEN"]);
 
 export async function GET() {
   if (!API_KEY) {
@@ -28,89 +25,117 @@ export async function GET() {
       {
         success: false,
         error: "API_FOOTBALL_KEY is missing from .env.local",
+        count: 0,
+        events: [],
       },
       { status: 500 }
     );
   }
 
-  // Return cached league data when available.
-  if (cachedLeagues && Date.now() < cacheExpiresAt) {
-    return Response.json(cachedLeagues);
-  }
+  const events = [];
+  const errors = [];
 
   try {
-    const response = await fetch(
-      "https://v3.football.api-sports.io/leagues",
-      {
-        headers: {
-          "x-apisports-key": API_KEY,
-        },
-        next: {
-          revalidate: 3600,
-        },
+    // Make requests sequentially to reduce rate-limit errors.
+    for (const league of leagues) {
+      try {
+        const url = new URL(
+          "https://v3.football.api-sports.io/fixtures"
+        );
+
+        url.searchParams.set("league", String(league.id));
+        url.searchParams.set("season", String(league.season));
+        url.searchParams.set("last", "20");
+        url.searchParams.set("timezone", "Africa/Accra");
+
+        const response = await fetch(url.toString(), {
+          headers: {
+            "x-apisports-key": API_KEY,
+          },
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        console.log(
+          `[Finished Matches] ${league.name}:`,
+          "HTTP",
+          response.status,
+          "Results:",
+          data.results,
+          "Errors:",
+          data.errors
+        );
+
+        if (!response.ok) {
+          errors.push({
+            league: league.name,
+            error: `HTTP ${response.status}`,
+          });
+          continue;
+        }
+
+        if (
+          data.errors &&
+          Object.keys(data.errors).length > 0
+        ) {
+          errors.push({
+            league: league.name,
+            error: data.errors,
+          });
+          continue;
+        }
+
+        for (const match of data.response || []) {
+          if (!COMPLETED_STATUSES.has(match.fixture?.status?.short)) {
+            continue;
+          }
+
+          events.push({
+            ...match,
+            leagueName: league.name,
+          });
+        }
+      } catch (leagueError) {
+        errors.push({
+          league: league.name,
+          error: leagueError.message || "Request failed",
+        });
       }
+    }
+
+    // Remove duplicate fixtures.
+    const uniqueEvents = [
+      ...new Map(
+        events
+          .filter((match) => match.fixture?.id != null)
+          .map((match) => [match.fixture.id, match])
+      ).values(),
+    ];
+
+    // Newest completed matches first.
+    uniqueEvents.sort(
+      (a, b) =>
+        new Date(b.fixture.date).getTime() -
+        new Date(a.fixture.date).getTime()
     );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return Response.json(
-        {
-          success: false,
-          error: data.errors || `API request failed: ${response.status}`,
-        },
-        { status: response.status }
-      );
-    }
-
-    if (data.errors && Object.keys(data.errors).length > 0) {
-      return Response.json(
-        {
-          success: false,
-          error: data.errors,
-        },
-        { status: 429 }
-      );
-    }
-
-    const availableLeagues = data.response || [];
-
-    // Keep only the 15 selected competitions.
-    const result = leagues.map((selected) => {
-      const match = availableLeagues.find(
-        (item) => item.league.id === selected.id
-      );
-
-      return {
-        league: {
-          id: selected.id,
-          name: selected.name,
-          logo: match?.league?.logo || null,
-          type: match?.league?.type || "League",
-        },
-        country: {
-          name: selected.country,
-          code: match?.country?.code || null,
-          flag: match?.country?.flag || null,
-        },
-        seasons: match?.seasons || [],
-      };
-    });
-
-    cachedLeagues = {
+    return Response.json({
       success: true,
-      count: result.length,
-      response: result,
-    };
-
-    cacheExpiresAt = Date.now() + 60 * 60 * 1000;
-
-    return Response.json(cachedLeagues);
+      count: uniqueEvents.length,
+      events: uniqueEvents,
+      errors,
+    });
   } catch (error) {
+    console.error("[Finished Matches API]", error);
+
     return Response.json(
       {
         success: false,
-        error: error.message || "Unable to load leagues",
+        error: error.message || "Failed to load finished matches",
+        count: events.length,
+        events,
+        errors,
       },
       { status: 500 }
     );
