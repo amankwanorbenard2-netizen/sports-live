@@ -1,6 +1,6 @@
 
 import { NextResponse } from "next/server";
-import { fetchFootball } from "../../../../lib/football-api";
+import { fetchFootball } from "../../../../../lib/football-api";
 
 export async function GET(request) {
   try {
@@ -8,9 +8,13 @@ export async function GET(request) {
 
     const league = searchParams.get("league") || "39";
     const season = searchParams.get("season") || "2026";
+
     const page = Math.max(
       1,
-      Math.min(100, Number.parseInt(searchParams.get("page") || "1", 10) || 1)
+      Math.min(
+        100,
+        Number.parseInt(searchParams.get("page") || "1", 10) || 1
+      )
     );
 
     const endpoint =
@@ -21,7 +25,10 @@ export async function GET(request) {
 
     if (data?.errors && Object.keys(data.errors).length > 0) {
       return NextResponse.json(
-        { error: "Football API returned an error.", details: data.errors },
+        {
+          error: "Football API returned an error.",
+          details: data.errors,
+        },
         { status: 502 }
       );
     }
@@ -60,8 +67,12 @@ export async function GET(request) {
       players,
     });
   } catch (error) {
+    console.error("Player statistics API error:", error);
+
     return NextResponse.json(
-      { error: error.message || "Unable to load player statistics." },
+      {
+        error: error.message || "Unable to load player statistics.",
+      },
       { status: 500 }
     );
   }
