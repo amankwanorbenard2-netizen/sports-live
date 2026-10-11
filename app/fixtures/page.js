@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import StatsBackButton from "../../components/StatsBackButton";
 
 const LIVE_STATUSES = ["1H", "2H", "HT", "ET", "BT", "P", "LIVE", "INT", "SUSP"];
 const FINISHED_STATUSES = ["FT", "AET", "PEN", "AWD", "WO"];
@@ -74,6 +75,7 @@ function MatchCard({ match }) {
           {home.logo && <img src={home.logo} alt="" loading="lazy" />}
           <span>{home.name || "Home team"}</span>
         </div>
+
         <div className="fixture-team">
           {away.logo && <img src={away.logo} alt="" loading="lazy" />}
           <span>{away.name || "Away team"}</span>
@@ -255,7 +257,9 @@ export default function FixturesPage() {
   return (
     <main className="fixtures-page">
       <style jsx global>{`
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
         body {
           margin: 0;
@@ -276,6 +280,27 @@ export default function FixturesPage() {
           margin: auto;
         }
 
+        .fixture-back-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 18px;
+          padding: 10px 14px;
+          border: 1px solid #29374c;
+          border-radius: 9px;
+          background: #101827;
+          color: #f5f7fb;
+          font-size: 13px;
+          font-weight: 800;
+          text-decoration: none;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+
+        .fixture-back-button:hover {
+          background: #1a2940;
+        }
+
         .fixture-top {
           display: flex;
           justify-content: space-between;
@@ -291,7 +316,9 @@ export default function FixturesPage() {
           letter-spacing: -.7px;
         }
 
-        .fixture-brand span { color: #c7f36b; }
+        .fixture-brand span {
+          color: #c7f36b;
+        }
 
         .fixture-timezone {
           border: 1px solid #29374c;
@@ -303,7 +330,9 @@ export default function FixturesPage() {
           font-weight: 800;
         }
 
-        .fixture-hero { padding: 26px 0 16px; }
+        .fixture-hero {
+          padding: 26px 0 16px;
+        }
 
         .fixture-eyebrow {
           color: #c7f36b;
@@ -358,7 +387,9 @@ export default function FixturesPage() {
           cursor: pointer;
         }
 
-        .fixture-date-button span { display: block; }
+        .fixture-date-button span {
+          display: block;
+        }
 
         .fixture-date-button .date-day {
           font-size: 10px;
@@ -378,7 +409,9 @@ export default function FixturesPage() {
           color: #14200b;
         }
 
-        .fixture-date-button.active .date-number { color: #14200b; }
+        .fixture-date-button.active .date-number {
+          color: #14200b;
+        }
 
         .fixture-tools {
           display: flex;
@@ -417,8 +450,13 @@ export default function FixturesPage() {
           outline: none;
         }
 
-        .fixture-search:focus { border-color: #c7f36b; }
-        .fixture-refresh:disabled { opacity: .5; }
+        .fixture-search:focus {
+          border-color: #c7f36b;
+        }
+
+        .fixture-refresh:disabled {
+          opacity: .5;
+        }
 
         .fixture-section-heading {
           display: flex;
@@ -465,9 +503,13 @@ export default function FixturesPage() {
         }
 
         .fixture-league-header strong,
-        .fixture-league-header small { display: block; }
+        .fixture-league-header small {
+          display: block;
+        }
 
-        .fixture-league-header strong { font-size: 12px; }
+        .fixture-league-header strong {
+          font-size: 12px;
+        }
 
         .fixture-league-header small {
           margin-top: 4px;
@@ -492,8 +534,13 @@ export default function FixturesPage() {
           color: inherit;
         }
 
-        .fixture-match:last-child { border-bottom: 0; }
-        .fixture-match:hover { background: #162238; }
+        .fixture-match:last-child {
+          border-bottom: 0;
+        }
+
+        .fixture-match:hover {
+          background: #162238;
+        }
 
         .fixture-kickoff {
           text-align: center;
@@ -551,7 +598,10 @@ export default function FixturesPage() {
           background: #0e1624;
         }
 
-        .fixture-empty h3 { font-size: 16px; margin: 0 0 8px; }
+        .fixture-empty h3 {
+          font-size: 16px;
+          margin: 0 0 8px;
+        }
 
         .fixture-empty p {
           color: #94a3b8;
@@ -576,7 +626,9 @@ export default function FixturesPage() {
         }
 
         @media (max-width: 600px) {
-          .fixtures-page { padding-top: 15px; }
+          .fixtures-page {
+            padding-top: 15px;
+          }
 
           .fixture-match {
             grid-template-columns: 68px minmax(0, 1fr) 35px;
@@ -584,20 +636,44 @@ export default function FixturesPage() {
             padding: 12px 8px;
           }
 
-          .fixture-team { font-size: 11px; gap: 6px; }
-          .fixture-team img { width: 19px; height: 19px; }
-          .fixture-kickoff { font-size: 10px; }
-          .fixture-search { flex-basis: 100%; }
-          .fixture-section-heading h2 { font-size: 16px; }
-          .fixture-panel-title { font-size: 12px; }
+          .fixture-team {
+            font-size: 11px;
+            gap: 6px;
+          }
+
+          .fixture-team img {
+            width: 19px;
+            height: 19px;
+          }
+
+          .fixture-kickoff {
+            font-size: 10px;
+          }
+
+          .fixture-search {
+            flex-basis: 100%;
+          }
+
+          .fixture-section-heading h2 {
+            font-size: 16px;
+          }
+
+          .fixture-panel-title {
+            font-size: 12px;
+          }
         }
       `}</style>
 
       <div className="fixture-container">
+        <div>
+          <StatsBackButton />
+        </div>
+
         <header className="fixture-top">
           <div className="fixture-brand">
             ⚽ FOOTBALL <span>FIXTURES</span>
           </div>
+
           <div className="fixture-timezone">GHANA TIME · GMT</div>
         </header>
 
@@ -689,6 +765,7 @@ export default function FixturesPage() {
               ? "Today's Fixtures"
               : `Fixtures · ${selected?.day}, ${selected?.label}`}
           </h2>
+
           <span className="fixture-count">
             {filteredMatches.length} matches
           </span>
