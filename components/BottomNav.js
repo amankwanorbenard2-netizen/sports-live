@@ -7,69 +7,51 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    {
-      name: "Home",
-      link: "/",
-      icon: "🏠",
-    },
-
-    {
-      name: "Live",
-      link: "/live",
-      icon: "🔴",
-    },
-
-    {
-      name: "Fixtures",
-      link: "/fixtures",
-      icon: "📅",
-    },
-
-    {
-      name: "Finished",
-      link: "/finished",
-      icon: "✅",
-    },
-
-    {
-      name: "Tables",
-      link: "/standings",
-      icon: "🏆",
-    },
-
-    {
-      name: "News",
-      link: "/news",
-      icon: "📰",
-    },
+    { name: "Home", link: "/", icon: "🏠" },
+    { name: "Live", link: "/live", icon: "🔴" },
+    { name: "Fixtures", link: "/fixtures", icon: "📅" },
+    { name: "Finished", link: "/finished", icon: "✅" },
+    { name: "Tables", link: "/standings", icon: "🏆" },
+    { name: "Teams", link: "/teams", icon: "⚽" },
+    { name: "News", link: "/news", icon: "📰" },
   ];
 
   return (
-    <div
+    <nav
+      aria-label="Main navigation"
       style={{
         position: "fixed",
         bottom: 0,
         left: 0,
         width: "100%",
+        boxSizing: "border-box",
         background: "#111827",
         borderTop: "1px solid #374151",
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
-        padding: "8px 0",
+        padding: "8px 2px calc(8px + env(safe-area-inset-bottom))",
         zIndex: 999,
         backdropFilter: "blur(10px)",
       }}
     >
       {navItems.map((item) => {
-        const active = pathname === item.link;
+        const active =
+          item.link === "/"
+            ? pathname === "/"
+            : pathname === item.link ||
+              pathname.startsWith(`${item.link}/`);
 
         return (
           <Link
             key={item.name}
             href={item.link}
+            aria-current={active ? "page" : undefined}
             style={{
+              flex: "1 1 0",
+              minWidth: 0,
               textDecoration: "none",
+              color: active ? "#22c55e" : "#9ca3af",
             }}
           >
             <div
@@ -77,27 +59,21 @@ export default function BottomNav() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                color: active ? "#22c55e" : "#9ca3af",
-                fontSize: "11px",
-                transition: "0.3s",
+                justifyContent: "center",
+                gap: "3px",
+                fontSize: "10px",
+                fontWeight: active ? "700" : "500",
                 cursor: "pointer",
-                minWidth: "55px",
               }}
             >
-              <span
-                style={{
-                  fontSize: "20px",
-                  marginBottom: "2px",
-                }}
-              >
+              <span style={{ fontSize: "19px", lineHeight: 1.3 }}>
                 {item.icon}
               </span>
-
               <span>{item.name}</span>
             </div>
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

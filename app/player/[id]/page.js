@@ -9,14 +9,14 @@ async function fetchJson(url) {
     const response = await fetch(url, { cache: "no-store" });
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error("API request failed:", response.status, data);
+    if (!response.ok || data?.error) {
+      console.error("Player API request failed:", data);
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error("API request failed:", error);
+    console.error("Player API request failed:", error);
     return null;
   }
 }
@@ -26,6 +26,27 @@ function hasErrors(data) {
     data?.error ||
       (data?.errors && Object.keys(data.errors).length > 0)
   );
+}
+
+function formatDate(value) {
+  if (!value) return "Not available";
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+}
+
+function display(value) {
+  if (value === null || value === undefined || value === "") {
+    return "N/A";
+  }
+  return value;
 }
 
 export default async function PlayerPage({ params }) {
@@ -38,44 +59,26 @@ export default async function PlayerPage({ params }) {
   const season = new Date().getFullYear();
 
   const data = await fetchJson(
-    `${SITE_URL}/api/player/${id}?season=${season}`
+    `${SITE_URL}/api/player/${encodeURIComponent(id)}?season=${season}`
   );
 
   if (!data || hasErrors(data)) {
     return (
-      <Message text="Unable to load player information. Check the API response and try again." />
+      <Message text="Unable to load player information. Please check the API response and try again." />
     );
   }
 
-  // Support both the old and new API response formats.
-  const playerEntry = data.response?.[0];
-  const player = data.player || playerEntry?.player;
-
-  const statistics = data.statistics || playerEntry?.statistics || [];
+  const entry = data.response?.[0];
+  const player = data.player || entry?.player;
+  const statistics = data.statistics || entry?.statistics || [];
 
   if (!player) {
     return <Message text="No player information was found." />;
   }
 
-  // Keep competitions with actual appearances.
   const allStats = statistics.filter(
     (stat) => Number(stat.games?.appearences || 0) > 0
   );
-
-  // The updated player route can return transfers directly.
-  // The separate transfers endpoint may use response[0].transfers.
-  const transferResponse = data.transfers;
-
-  const transfers = Array.isArray(transferResponse)
-    ? transferResponse.flatMap((item) =>
-        Array.isArray(item?.transfers) ? item.transfers : [item]
-      )
-    : [];
-
-  const injuryResponse = data.injuries;
-  const injuries = Array.isArray(injuryResponse)
-    ? injuryResponse
-    : [];
 
   const firstStat = allStats[0] || statistics[0];
 
@@ -85,31 +88,46 @@ export default async function PlayerPage({ params }) {
       0
     );
 
-  const totalAppearances = total((s) => s.games?.appearences);
-  const totalMinutes = total((s) => s.games?.minutes);
-  const totalGoals = total((s) => s.goals?.total);
-  const totalAssists = total((s) => s.goals?.assists);
+  const appearances = total((s) => s.games?.appearences);
+  const minutes = total((s) => s.games?.minutes);
+  const goals = total((s) => s.goals?.total);
+  const assists = total((s) => s.goals?.assists);
 
-  const formatDate = (value) => {
-    if (!value) return "Not available";
+  // These are competition-level ratings, not individual match ratings.
+  const ratings = allStats
+    .map((stat) => Number(stat.games?.rating))
+    .filter((rating) => Number.isFinite(rating) && rating > 0);
 
-    const date = new Date(value);
+  const averageRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((sum, rating) => sum + rating, 0) /
+          ratings.length
+        ).toFixed(2)
+      : null;
 
-    return Number.isNaN(date.getTime())
-      ? value
-      : date.toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
-  };
+  const transfers = Array.isArray(data.transfers)
+    ? data.transfers
+        .flatMap((item) =>
+          Array.isArray(item?.transfers) ? item.transfers : [item]
+        )
+        .filter((item) => item && (item.date || item.teams))
+        .sort(
+          (a, b) =>
+            new Date(b.date || 0).getTime() -
+            new Date(a.date || 0).getTime()
+        )
+    : [];
+
+  const injuries = Array.isArray(data.injuries) ? data.injuries : [];
+  const additionalErrors = data.additionalDataErrors || {};
 
   return (
     <main style={styles.main}>
       <header style={styles.header}>
         <BackButton />
         <div>
-          <h2 style={{ margin: 0, fontSize: 24 }}>
+          <h2 style={{ margin: 0, fontSize: 23 }}>
             {player.name}
           </h2>
           <p style={styles.muted}>
@@ -142,31 +160,20 @@ export default async function PlayerPage({ params }) {
 
             <div style={styles.infoGrid}>
               <Info label="Age" value={player.age} />
-              <Info
-                label="Nationality"
-                value={player.nationality}
-              />
-              <Info
-                label="Date of birth"
-                value={player.birth?.date}
-              />
-              <Info
-                label="Birthplace"
-                value={player.birth?.place}
-              />
+              <Info label="Nationality" value={player.nationality} />
+              <Info label="Date of birth" value={player.birth?.date} />
+              <Info label="Birthplace" value={player.birth?.place} />
               <Info label="Height" value={player.height} />
               <Info label="Weight" value={player.weight} />
-              <Info
-                label="Current club"
-                value={firstStat?.team?.name}
-              />
-              <Info
-                label="Shirt number"
-                value={firstStat?.games?.number}
-              />
+              <Info label="Current club" value={firstStat?.team?.name} />
+              <Info label="Shirt number" value={firstStat?.games?.number} />
               <Info
                 label="Injury status"
-                value={player.injured ? "Injured" : "Not listed as injured"}
+                value={
+                  player.injured
+                    ? "Injured"
+                    : "Not listed as injured"
+                }
               />
             </div>
           </div>
@@ -174,14 +181,24 @@ export default async function PlayerPage({ params }) {
 
         {/* SEASON SUMMARY */}
         <section style={styles.section}>
-          <SectionTitle>Season Summary</SectionTitle>
+          <SectionTitle>Season Summary · {season}</SectionTitle>
 
           <div style={styles.statsGrid}>
-            <Stat label="Appearances" value={totalAppearances} />
-            <Stat label="Minutes" value={totalMinutes} />
-            <Stat label="Goals" value={totalGoals} />
-            <Stat label="Assists" value={totalAssists} />
+            <Stat label="Appearances" value={appearances} />
+            <Stat label="Minutes played" value={minutes} />
+            <Stat label="Goals" value={goals} />
+            <Stat label="Assists" value={assists} />
+            <Stat
+              label="Average rating"
+              value={averageRating ?? "N/A"}
+              featured
+            />
           </div>
+
+          <p style={styles.note}>
+            The average rating is calculated from the available
+            competition-level ratings. It is not a match-by-match average.
+          </p>
         </section>
 
         {/* COMPETITION STATISTICS */}
@@ -202,8 +219,8 @@ export default async function PlayerPage({ params }) {
                       <img
                         src={stat.league.logo}
                         alt=""
-                        width={48}
-                        height={48}
+                        width={45}
+                        height={45}
                         style={styles.logo}
                       />
                     )}
@@ -226,8 +243,8 @@ export default async function PlayerPage({ params }) {
                       <img
                         src={stat.team.logo}
                         alt=""
-                        width={42}
-                        height={42}
+                        width={38}
+                        height={38}
                         style={styles.logo}
                       />
                     )}
@@ -240,7 +257,16 @@ export default async function PlayerPage({ params }) {
                     <Stat label="Minutes" value={stat.games?.minutes} />
                     <Stat label="Goals" value={stat.goals?.total} />
                     <Stat label="Assists" value={stat.goals?.assists} />
-                    <Stat label="Rating" value={stat.games?.rating} />
+                    <Stat
+                      label="Rating"
+                      value={
+                        stat.games?.rating != null &&
+                        stat.games.rating !== ""
+                          ? Number(stat.games.rating).toFixed(2)
+                          : "N/A"
+                      }
+                      featured
+                    />
                     <Stat label="Shots" value={stat.shots?.total} />
                     <Stat label="Shots on target" value={stat.shots?.on} />
                     <Stat label="Key passes" value={stat.passes?.key} />
@@ -275,8 +301,21 @@ export default async function PlayerPage({ params }) {
         <section style={styles.section}>
           <SectionTitle>Transfer History</SectionTitle>
 
+          {additionalErrors.transfers && (
+            <p style={styles.warning}>
+              The transfer service returned an error. Other player
+              information can still be displayed.
+            </p>
+          )}
+
           {transfers.length === 0 ? (
-            <EmptyState text="Transfer history is unavailable or no transfers were returned by the API." />
+            <EmptyState
+              text={
+                additionalErrors.transfers
+                  ? "Transfer history could not be retrieved. Please try again later."
+                  : "No transfer records were returned by the API."
+              }
+            />
           ) : (
             <div style={styles.timeline}>
               {transfers.map((transfer, index) => (
@@ -310,8 +349,7 @@ export default async function PlayerPage({ params }) {
                       {transfer.type || "Not provided"}
                     </p>
                     <p>
-                      <strong>Date:</strong>{" "}
-                      {formatDate(transfer.date)}
+                      <strong>Date:</strong> {formatDate(transfer.date)}
                     </p>
                   </div>
                 </article>
@@ -324,8 +362,16 @@ export default async function PlayerPage({ params }) {
         <section style={styles.section}>
           <SectionTitle>Injury History</SectionTitle>
 
+          {additionalErrors.injuries && (
+            <p style={styles.warning}>
+              Injury records could not be retrieved for this request.
+            </p>
+          )}
+
           {injuries.length === 0 ? (
-            <EmptyState text="No injury records were returned for this player and season." />
+            <EmptyState
+              text="No injury records were returned for this player and season."
+            />
           ) : (
             <div style={styles.cardsGrid}>
               {injuries.map((injury, index) => (
@@ -359,8 +405,9 @@ export default async function PlayerPage({ params }) {
         </section>
 
         <p style={styles.footer}>
-          Statistics and history depend on the information returned by
-          API-Sports. Missing values are not assumed to be zero.
+          Statistics, ratings, transfers, and injury records depend on
+          the information returned by API-Sports. Missing values are
+          shown as N/A and are not assumed to be zero.
         </p>
       </div>
     </main>
@@ -375,16 +422,21 @@ function Info({ label, value }) {
   return (
     <div style={styles.infoBox}>
       <p style={styles.label}>{label}</p>
-      <strong>{value ?? "Not available"}</strong>
+      <strong>{display(value)}</strong>
     </div>
   );
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, featured = false }) {
   return (
-    <div style={styles.statBox}>
+    <div
+      style={{
+        ...styles.statBox,
+        ...(featured ? styles.featuredStat : {}),
+      }}
+    >
       <p style={styles.label}>{label}</p>
-      <strong style={styles.statValue}>{value ?? "—"}</strong>
+      <strong style={styles.statValue}>{display(value)}</strong>
     </div>
   );
 }
@@ -474,10 +526,10 @@ const styles = {
     margin: "6px 0 18px",
   },
   section: {
-    marginTop: 48,
+    marginTop: 42,
   },
   sectionTitle: {
-    fontSize: "clamp(26px, 4vw, 36px)",
+    fontSize: "clamp(24px, 4vw, 34px)",
     marginBottom: 22,
   },
   infoGrid: {
@@ -514,6 +566,10 @@ const styles = {
     borderRadius: 12,
     padding: 12,
     minWidth: 0,
+  },
+  featuredStat: {
+    border: "1px solid #eab308",
+    background: "rgba(234,179,8,0.10)",
   },
   label: {
     color: "#94a3b8",
@@ -580,6 +636,19 @@ const styles = {
     borderRadius: 16,
     padding: 22,
     color: "#cbd5e1",
+  },
+  note: {
+    color: "#94a3b8",
+    fontSize: 12,
+    lineHeight: 1.7,
+    marginTop: 12,
+  },
+  warning: {
+    color: "#fbbf24",
+    background: "rgba(245,158,11,0.08)",
+    border: "1px solid rgba(245,158,11,0.3)",
+    borderRadius: 12,
+    padding: 14,
   },
   footer: {
     color: "#64748b",

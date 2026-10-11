@@ -14,25 +14,92 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Use the requested season, or default to the current season.
     const season =
-      searchParams.get("season") || String(new Date().getFullYear());
+      searchParams.get("season") ||
+      String(new Date().getFullYear());
 
-    const data = await fetchFootball(
+    const playerData = await fetchFootball(
       `players?id=${encodeURIComponent(id)}&season=${encodeURIComponent(season)}`
     );
 
-    if (data?.errors && Object.keys(data.errors).length > 0) {
+    if (
+      playerData?.errors &&
+      Object.keys(playerData.errors).length > 0
+    ) {
       return NextResponse.json(
         {
-          error: "API-Sports rejected the player request.",
-          details: data.errors,
+          error: "Unable to retrieve player information.",
+          details: playerData.errors,
         },
         { status: 502 }
       );
     }
 
-    return NextResponse.json(data);
+    const playerEntry = playerData?.response?.[0];
+
+    if (!playerEntry?.player) {
+      return NextResponse.json(
+        { error: "No player information was found." },
+        { status: 404 }
+      );
+    }
+
+    const additionalDataErrors = {};
+    let transfers = [];
+    let injuries = [];
+
+    // Transfers are optional: do not fail the whole profile
+    // if the provider limits or rejects this request.
+    try {
+      const transferData = await fetchFootball(
+        `transfers?player=${encodeURIComponent(id)}`
+      );
+
+      if (
+        transferData?.errors &&
+        Object.keys(transferData.errors).length > 0
+      ) {
+        additionalDataErrors.transfers = transferData.errors;
+      } else {
+        transfers = (transferData?.response || []).flatMap(
+          (item) => Array.isArray(item?.transfers)
+            ? item.transfers
+            : []
+        );
+      }
+    } catch (error) {
+      additionalDataErrors.transfers =
+        error instanceof Error ? error.message : "Request failed";
+    }
+
+    // Injuries are also optional.
+    try {
+      const injuryData = await fetchFootball(
+        `injuries?player=${encodeURIComponent(id)}&season=${encodeURIComponent(season)}`
+      );
+
+      if (
+        injuryData?.errors &&
+        Object.keys(injuryData.errors).length > 0
+      ) {
+        additionalDataErrors.injuries = injuryData.errors;
+      } else {
+        injuries = injuryData?.response || [];
+      }
+    } catch (error) {
+      additionalDataErrors.injuries =
+        error instanceof Error ? error.message : "Request failed";
+    }
+
+    return NextResponse.json({
+      ...playerData,
+      player: playerEntry.player,
+      statistics: playerEntry.statistics || [],
+      transfers,
+      injuries,
+      season,
+      additionalDataErrors,
+    });
   } catch (error) {
     console.error("Player route error:", error);
 
