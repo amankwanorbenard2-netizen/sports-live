@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -39,6 +40,12 @@ export default function HomePage() {
       link: "/teams",
       color: "#06d6a0",
       emoji: "⚽",
+    },
+    {
+      title: "Football Statistics",
+      link: "/stats",
+      color: "#06b6d4",
+      emoji: "📊",
     },
   ];
 
